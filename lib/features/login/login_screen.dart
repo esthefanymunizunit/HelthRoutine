@@ -45,7 +45,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     const Icon(
                       Icons.auto_awesome, // Ícone que lembra o brilho do logo
                       size: 60,
-                      color: AppColors.white,
+                      color: AppColors.starYellow,
                     ),
                     const SizedBox(height: 10),
                     // Título usando o estilo padrão, com cor sobrescrita para branco
@@ -53,7 +53,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       'HealthRoutine',
                       style: AppTextStyles.heading1.copyWith(
                         fontSize: 32,
-                        color: AppColors.white,
+                        color: AppColors.starYellow,
                         shadows: [
                           Shadow(
                             color: AppColors.black.withOpacity(0.15),
