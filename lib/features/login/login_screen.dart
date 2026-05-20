@@ -80,7 +80,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // 3. Card Branco Inferior
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
                         decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: const BorderRadius.vertical(
@@ -148,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 30),
+                            const SizedBox(height: 20),
 
                             // --- Campo: Usuário ou Email ---
                             TextField(
@@ -167,7 +167,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 15),
+                            const SizedBox(height: 10),
 
                             // --- Campo: Senha ---
                             TextField(
@@ -187,7 +187,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 25),
+                            const SizedBox(height: 15),
 
                             // --- Botão Principal ---
                             SizedBox(
