@@ -48,7 +48,6 @@ class _LoginScreenState extends State<LoginScreen> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                // TODO: Substituir pelo Image.asset() com a estrelinha do Figma
                                 SvgPicture.asset(
                                   'assets/icons/Logo.svg', 
                                   width: 92,
@@ -62,7 +61,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     color: AppColors.starYellow,
                                     shadows: [
                                       Shadow(
-                                        color: AppColors.black.withOpacity(0.15),
+                                        color: Colors.grey,
                                         offset: const Offset(1, 2),
                                         blurRadius: 3,
                                       ),
@@ -159,7 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide(color: AppColors.black.withOpacity(0.15), width: 1.5),
+                                  borderSide: BorderSide(color: AppColors.black.withValues(alpha: 0.15), width: 1.5),
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(30),
@@ -184,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                                   enabledBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(30),
-                                    borderSide: BorderSide(color: AppColors.black.withOpacity(0.15), width: 1.5),
+                                    borderSide: BorderSide(color: AppColors.black.withValues(alpha: 0.15), width: 1.5),
                                   ),
                                   focusedBorder: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(30),
@@ -236,39 +235,17 @@ class _LoginScreenState extends State<LoginScreen> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Container(
-                                  width: 45,
-                                  height: 45,
-                                  decoration: const BoxDecoration(
-                                    color: Color(0xFF1877F2),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: const Icon(Icons.facebook, color: AppColors.white, size: 28),
-                                ),
+                                SvgPicture.asset(
+                                    'assets/icons/facebook.svg', 
+                                    width: 29, 
+                                    height: 29),
+                                
                                 const SizedBox(width: 20),
-                                Container(
-                                  width: 45,
-                                  height: 45,
-                                  decoration: BoxDecoration(
-                                    color: AppColors.white,
-                                    shape: BoxShape.circle,
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: AppColors.black.withOpacity(0.1),
-                                        blurRadius: 4,
-                                        offset: const Offset(0, 2),
-                                      )
-                                    ],
-                                  ),
-                                  child: Center(
-                                    child: Text(
-                                      'G',
-                                      style: AppTextStyles.heading1.copyWith(
-                                        color: Colors.red, 
-                                        fontSize: 24,
-                                      ),
-                                    ),
-                                  ),
+                                
+                                SvgPicture.asset(
+                                  'assets/icons/google.svg',
+                                  width: 32,
+                                  height: 32,
                                 ),
                               ],
                             ),
