@@ -85,9 +85,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.black.withOpacity(0.05),
+                              color: AppColors.black,
                               blurRadius: 15,
-                              offset: const Offset(0, -5),
+                              offset: const Offset(0, 15),
                             )
                           ],
                         ),
@@ -95,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
-                              height: 45,
+                              height: 43,
                               decoration: BoxDecoration(
                                 color: AppColors.white,
                                 border: Border.all(color: primaryActionColor, width: 1.5),
@@ -116,7 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           'Log in',
                                           style: AppTextStyles.bodyBold.copyWith(
                                             color: isLogin ? AppColors.white : primaryActionColor,
-                                            fontSize: 16,
+                                            fontSize: 24,
                                           ),
                                         ),
                                       ),
@@ -135,7 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                           'Sign in',
                                           style: AppTextStyles.bodyBold.copyWith(
                                             color: !isLogin ? AppColors.white : primaryActionColor,
-                                            fontSize: 16,
+                                            fontSize: 24,
                                           ),
                                         ),
                                       ),
@@ -144,15 +144,18 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            const SizedBox(height: 40),
 
                             // --- Campo: Usuário ou Email ---
-                            TextField(
+                            SizedBox(
+                              height: 43,
+                              child: TextField(
                               style: AppTextStyles.bodyBold.copyWith(color: AppColors.black, fontSize: 14),
+                              textAlignVertical: TextAlignVertical.center,
                               decoration: InputDecoration(
                                 hintText: 'Usuário ou Email',
                                 hintStyle: AppTextStyles.bodySmall.copyWith(fontSize: 14, color: Colors.black38),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
                                 enabledBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(30),
                                   borderSide: BorderSide(color: AppColors.black.withOpacity(0.15), width: 1.5),
@@ -163,32 +166,39 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 10),
+                            ),
+                            
+                            const SizedBox(height: 20),
 
                             // --- Campo: Senha ---
-                            TextField(
-                              obscureText: true,
-                              style: AppTextStyles.bodyBold.copyWith(color: AppColors.black, fontSize: 14),
-                              decoration: InputDecoration(
-                                hintText: 'Senha',
-                                hintStyle: AppTextStyles.bodySmall.copyWith(fontSize: 14, color: Colors.black38),
-                                contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide(color: AppColors.black.withOpacity(0.15), width: 1.5),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                  borderSide: const BorderSide(color: primaryActionColor, width: 1.5),
+                            SizedBox(
+                              height: 43,
+                              child: TextField(
+                                obscureText: true,
+                                style: AppTextStyles.bodyBold.copyWith(color: AppColors.black, fontSize: 14),
+                                textAlignVertical: TextAlignVertical.center,
+                                decoration: InputDecoration(
+                                  hintText: 'Senha',
+                                  hintStyle: AppTextStyles.bodySmall.copyWith(fontSize: 14, color: Colors.black38),
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                    borderSide: BorderSide(color: AppColors.black.withOpacity(0.15), width: 1.5),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                    borderSide: const BorderSide(color: primaryActionColor, width: 1.5),
+                                  ),
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 15),
+                            
+                            const SizedBox(height: 30),
 
                             // --- Botão Principal ---
                             SizedBox(
-                              width: 200, 
-                              height: 50,
+                              width: 155, 
+                              height: 42,
                               child: ElevatedButton(
                                 onPressed: () {
                                   // Ação
@@ -204,7 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                   isLogin ? 'Log in' : 'Sign in', 
                                   style: AppTextStyles.heading2.copyWith(
                                     color: AppColors.white,
-                                    fontSize: 18,
+                                    fontSize: 24,
                                   ),
                                 ),
                               ),
