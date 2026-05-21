@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -48,10 +49,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 // TODO: Substituir pelo Image.asset() com a estrelinha do Figma
-                                const Icon(
-                                  Icons.auto_awesome, 
-                                  size: 55,
-                                  color: AppColors.starYellow, 
+                                SvgPicture.asset(
+                                  'assets/icons/Logo.svg', 
+                                  width: 92,
+                                  height: 86,
                                 ),
                                 const SizedBox(width: 10),
                                 Text(
