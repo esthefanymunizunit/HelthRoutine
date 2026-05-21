@@ -10,24 +10,21 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  // Variável para alternar entre "Log in" e "Sign in"
   bool isLogin = true;
 
   @override
   Widget build(BuildContext context) {
-    // Usando a cor baseada no seu Figma
     const Color primaryActionColor = AppColors.cloudBlue; 
 
     return Scaffold(
-      // 1. LayoutBuilder + SingleChildScrollView para evitar o Overflow!
       body: LayoutBuilder(
         builder: (context, constraints) {
           return SingleChildScrollView(
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minHeight: constraints.maxHeight, // Garante que ocupe a tela toda no mínimo
+                minHeight: constraints.maxHeight,
               ),
-              child: IntrinsicHeight( // Permite que o Expanded funcione dentro do Scroll
+              child: IntrinsicHeight(
                 child: Container(
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
@@ -45,9 +42,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       // 2. Área do Logo (Parte Superior)
                       Expanded(
-                        child: SafeArea( // SafeArea evita que o logo fique atrás da barra de status (bateria/hora) do celular
+                        child: SafeArea(
                           child: Center(
-                            // AQUI: Trocamos Column por Row para ficar lado a lado
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
@@ -57,12 +53,12 @@ class _LoginScreenState extends State<LoginScreen> {
                                   size: 55,
                                   color: AppColors.starYellow, 
                                 ),
-                                const SizedBox(width: 10), // SizedBox com width (largura) para dar espaço horizontal
+                                const SizedBox(width: 10),
                                 Text(
                                   'HealthRoutine',
                                   style: AppTextStyles.heading1.copyWith(
                                     fontSize: 32,
-                                    color: AppColors.starYellow, // Corrigido para amarelo!
+                                    color: AppColors.starYellow,
                                     shadows: [
                                       Shadow(
                                         color: AppColors.black.withOpacity(0.15),
@@ -80,6 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       // 3. Card Branco Inferior
                       Container(
+                        height: MediaQuery.of(context).size.height * 0.65,
                         padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
                         decoration: BoxDecoration(
                           color: AppColors.white,
@@ -97,7 +94,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // --- Seletor Customizado Ajustado para o Figma ---
                             Container(
                               height: 45,
                               decoration: BoxDecoration(

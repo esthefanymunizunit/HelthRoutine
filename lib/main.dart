@@ -13,12 +13,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'HealthRoutine',
-      debugShowCheckedModeBanner: false, // Remove aquela faixa vermelha de "DEBUG" da tela
+      debugShowCheckedModeBanner: false,
       
-      // 1. Integrando o Tema da sua equipe
       theme: AppTheme.lightTheme, 
       
-      // 2. Definindo a Tela de Login como a tela inicial do app
       home: const LoginScreen(), 
     );
   }
