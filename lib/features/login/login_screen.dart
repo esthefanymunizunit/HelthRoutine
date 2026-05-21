@@ -182,6 +182,30 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             
+                            if(!isLogin) ...[
+                              const SizedBox(height: 20),
+                              SizedBox(
+                                height: 43,
+                                child: TextField(
+                                  obscureText: true,
+                                  style: AppTextStyles.bodyBold.copyWith(color: AppColors.black, fontSize: 14),
+                                  textAlignVertical: TextAlignVertical.center,
+                                  decoration: InputDecoration(
+                                    hintText: 'Confirmar senha',
+                                    hintStyle: AppTextStyles.bodySmall.copyWith(fontSize: 14, color: Colors.black38),
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                                    enabledBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                      borderSide: BorderSide(color: AppColors.black.withValues(alpha: 0.15), width: 1.5),
+                                    ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(30),
+                                      borderSide: const BorderSide(color: primaryActionColor, width: 1.5),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
                             const SizedBox(height: 30),
 
                             // --- Botão Principal ---
