@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../../core/widgets/app_background.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -26,19 +27,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 minHeight: constraints.maxHeight,
               ),
               child: IntrinsicHeight(
-                child: Container(
-                  decoration: const BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        AppColors.cloudBlue,          
-                        AppColors.backgroundOffWhite, 
-                        AppColors.white,              
-                      ],
-                      stops: [0.0, 0.4, 0.7],
-                    ),
-                  ),
+                child: AppBackground(
                   child: Column(
                     children: [
                       // 2. Área do Logo (Parte Superior)
