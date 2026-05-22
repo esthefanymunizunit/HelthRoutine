@@ -1,21 +1,95 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:flutter/services.dart';
 
-// Imports do Core
+import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_background.dart';
+import '../../../core/widgets/custom_bottom_nav.dart';
 
-// Imports dos Widgets da Feature Home
 import '../widgets/mood_icon.dart';
 import '../widgets/activity_card.dart';
 import '../widgets/suggestion_card.dart';
-import '../widgets/bottom_nav_icon.dart';
+import '../widgets/low_energy_dialog.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  bool isLowEnergyMode = false;
+
+  Map<String, dynamic>? mockData;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadMockData();
+  }
+
+  Future<void> _loadMockData() async {
+    try {
+      final String response = await rootBundle.loadString(
+        'assets/mocks/home_mock.json',
+      );
+      final data = await json.decode(response);
+      setState(() {
+        mockData = data;
+        isLoading = false; 
+      });
+    } catch (e) {
+      debugPrint("Erro ao carregar o mock: $e");
+    }
+  }
+
+  Color _getColor(String colorKey) {
+    switch (colorKey) {
+      case 'pink':
+        return AppColors.activityPink;
+      case 'blue':
+        return AppColors.activityBlue;
+      case 'green':
+        return AppColors.activityGreen;
+      default:
+        return AppColors.white;
+    }
+  }
+
+  void _toggleLowEnergyMode() async {
+    if (isLowEnergyMode) {
+      setState(() => isLowEnergyMode = false);
+    } else {
+      final bool? confirm = await showDialog<bool>(
+        context: context,
+        builder: (context) => const LowEnergyDialog(),
+      );
+      if (confirm == true) {
+        setState(() => isLowEnergyMode = true);
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.blueVariant),
+        ),
+      );
+    }
+
+    final List<dynamic> currentActivities = isLowEnergyMode
+        ? mockData!['lowEnergyActivities']
+        : mockData!['normalActivities'];
+
+    final List<dynamic> currentSuggestions = mockData!['suggestions'];
+
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -24,13 +98,15 @@ class HomePage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // --- CABEÇALHO ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Row(
                       children: [
-                        Text('Olá, Mariana !', style: AppTextStyles.heading1),
+                        Text(
+                          AppStrings.greeting,
+                          style: AppTextStyles.heading1,
+                        ),
                         const SizedBox(width: 8),
                         const Icon(
                           Icons.face_retouching_natural,
@@ -48,73 +124,36 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
 
-                // --- CARD DE CHECK-IN ---
-                Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('Check-in', style: AppTextStyles.heading2),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Como você está hoje?',
-                        style: AppTextStyles.bodySmall,
-                      ),
-                      const SizedBox(height: 20),
-                      const Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          MoodIcon(
-                            color: AppColors.moodAnimada,
-                            label: 'Animada',
-                            icon: Icons.sentiment_satisfied_alt,
-                          ),
-                          MoodIcon(
-                            color: AppColors.moodSensivel,
-                            label: 'Sensível',
-                            icon: Icons.sentiment_neutral,
-                          ),
-                          MoodIcon(
-                            color: AppColors.moodBrava,
-                            label: 'Brava',
-                            icon: Icons.sentiment_very_dissatisfied,
-                          ),
-                          MoodIcon(
-                            color: AppColors.moodInsegura,
-                            label: 'Insegura',
-                            icon: Icons.remove_red_eye,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
+                isLowEnergyMode ? _buildLowEnergyBanner() : _buildCheckInCard(),
                 const SizedBox(height: 32),
 
-                // --- ATIVIDADES DE HOJE ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('Atividades de Hoje', style: AppTextStyles.heading2),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 8,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.black,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: const Text(
-                        'Baixa energia',
-                        style: TextStyle(
-                          color: AppColors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 12,
+                    Text(
+                      AppStrings.activitiesTitle,
+                      style: AppTextStyles.heading2,
+                    ),
+                    GestureDetector(
+                      onTap: _toggleLowEnergyMode,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.black,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          isLowEnergyMode
+                              ? AppStrings.btnDisable
+                              : AppStrings.btnLowEnergy,
+                          style: const TextStyle(
+                            color: AppColors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 12,
+                          ),
                         ),
                       ),
                     ),
@@ -122,7 +161,6 @@ class HomePage extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Lista de Atividades
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -130,37 +168,30 @@ class HomePage extends StatelessWidget {
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
-                  child: const Column(
-                    children: [
-                      ActivityCard(
-                        color: AppColors.activityPink,
-                        title: 'Caminhar com o cachorro',
-                      ),
-                      SizedBox(height: 12),
-                      ActivityCard(
-                        color: AppColors.activityBlue,
-                        title: 'Estudar',
-                      ),
-                      SizedBox(height: 12),
-                      ActivityCard(
-                        color: AppColors.activityGreen,
-                        title: 'Meditação Rápida',
-                      ),
-                    ],
+                  child: Column(
+                    children: currentActivities
+                        .map(
+                          (activity) => Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: ActivityCard(
+                              color: _getColor(activity['colorKey']),
+                              title: activity['title'],
+                            ),
+                          ),
+                        )
+                        .toList(),
                   ),
                 ),
                 const SizedBox(height: 32),
-
-                // --- SUGERIDO PARA VOCÊ ---
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      'Sugerido para você',
+                      AppStrings.suggestionsTitle,
                       style: AppTextStyles.heading2.copyWith(fontSize: 14),
                     ),
                     const Text(
-                      'Ver todas',
+                      AppStrings.btnSeeAll,
                       style: TextStyle(
                         color: AppColors.cloudBlue,
                         fontWeight: FontWeight.bold,
@@ -170,22 +201,22 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
-                const Row(
-                  children: [
-                    Expanded(
-                      child: SuggestionCard(
-                        title: 'Dica de nutrição',
-                        subtitle: 'Alimentos que ajudam...',
-                      ),
-                    ),
-                    SizedBox(width: 16),
-                    Expanded(
-                      child: SuggestionCard(
-                        title: 'Técnica de meditação',
-                        subtitle: '',
-                      ),
-                    ),
-                  ],
+                Row(
+                  children: currentSuggestions
+                      .map(
+                        (sug) => Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              right: sug == currentSuggestions.first ? 16.0 : 0,
+                            ),
+                            child: SuggestionCard(
+                              title: sug['title'],
+                              subtitle: sug['subtitle'],
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
                 ),
                 const SizedBox(height: 80),
               ],
@@ -194,35 +225,81 @@ class HomePage extends StatelessWidget {
         ),
       ),
 
-      // --- BOTTOM NAVIGATION BAR ---
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: AppColors.black,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.add, color: AppColors.starYellow, size: 32),
+      floatingActionButton: CustomBottomNav.buildFAB(context),
+      bottomNavigationBar: const CustomBottomNav(),
+    );
+  }
+
+  Widget _buildCheckInCard() {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(24),
       ),
-      bottomNavigationBar: const BottomAppBar(
-        color: AppColors.cloudBlue,
-        shape: CircularNotchedRectangle(),
-        notchMargin: 8,
-        child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 8.0),
-          child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(AppStrings.checkInTitle, style: AppTextStyles.heading2),
+          const SizedBox(height: 4),
+          Text(AppStrings.checkInSubtitle, style: AppTextStyles.bodySmall),
+          const SizedBox(height: 20),
+          const Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              BottomNavIcon(
-                icon: Icons.home_filled,
-                label: 'Home',
-                isSelected: true,
+              MoodIcon(
+                color: AppColors.moodAnimada,
+                label: 'Animada',
+                icon: Icons.sentiment_satisfied_alt,
               ),
-              BottomNavIcon(icon: Icons.list, label: 'Templates'),
-              SizedBox(width: 48),
-              BottomNavIcon(icon: Icons.bar_chart, label: 'Relatórios'),
-              BottomNavIcon(icon: Icons.person_outline, label: 'Perfil'),
+              MoodIcon(
+                color: AppColors.moodSensivel,
+                label: 'Sensível',
+                icon: Icons.sentiment_neutral,
+              ),
+              MoodIcon(
+                color: AppColors.moodBrava,
+                label: 'Brava',
+                icon: Icons.sentiment_very_dissatisfied,
+              ),
+              MoodIcon(
+                color: AppColors.moodInsegura,
+                label: 'Insegura',
+                icon: Icons.remove_red_eye,
+              ),
             ],
           ),
-        ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLowEnergyBanner() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: AppColors.moodInsegura,
+        borderRadius: BorderRadius.circular(24),
+      ),
+      child: Column(
+        children: [
+          Text(
+            AppStrings.lowEnergyBannerTitle,
+            style: AppTextStyles.heading2.copyWith(color: AppColors.black),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          Text(
+            AppStrings.lowEnergyBannerSubtitle,
+            style: AppTextStyles.bodyBold.copyWith(
+              color: AppColors.black,
+              fontSize: 12,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
