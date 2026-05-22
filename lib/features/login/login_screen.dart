@@ -90,45 +90,65 @@ class _LoginScreenState extends State<LoginScreen> {
                                 border: Border.all(color: primaryActionColor, width: 1.5),
                                 borderRadius: BorderRadius.circular(25),
                               ),
-                              child: Row(
+                              child: Stack(
                                 children: [
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () => setState(() => isLogin = true),
+                                  // --- CAMADA 1: O Fundo Azul Deslizante ---
+                                  AnimatedAlign(
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOut,
+                                    alignment: isLogin ? Alignment.centerLeft : Alignment.centerRight,
+                                    child: FractionallySizedBox(
+                                      widthFactor: 0.5, // Garante que a pílula azul ocupe exatamente 50% da largura
                                       child: Container(
                                         decoration: BoxDecoration(
-                                          color: isLogin ? primaryActionColor : Colors.transparent,
+                                          color: primaryActionColor,
                                           borderRadius: BorderRadius.circular(25),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          'Log in',
-                                          style: AppTextStyles.bodyBold.copyWith(
-                                            color: isLogin ? AppColors.white : primaryActionColor,
-                                            fontSize: 24,
-                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                  Expanded(
-                                    child: GestureDetector(
-                                      onTap: () => setState(() => isLogin = false),
-                                      child: Container(
-                                        decoration: BoxDecoration(
-                                          color: !isLogin ? primaryActionColor : Colors.transparent,
-                                          borderRadius: BorderRadius.circular(25),
-                                        ),
-                                        alignment: Alignment.center,
-                                        child: Text(
-                                          'Sign in',
-                                          style: AppTextStyles.bodyBold.copyWith(
-                                            color: !isLogin ? AppColors.white : primaryActionColor,
-                                            fontSize: 24,
+
+                                  // --- CAMADA 2: Os Botões Clicáveis e os Textos ---
+                                  Row(
+                                    children: [
+                                      // Botão Log in
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () => setState(() => isLogin = true),
+                                          behavior: HitTestBehavior.opaque, // <-- Importante: Permite clicar na área transparente!
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            child: AnimatedDefaultTextStyle(
+                                              duration: const Duration(milliseconds: 300),
+                                              style: AppTextStyles.bodyBold.copyWith(
+                                                color: isLogin ? AppColors.white : primaryActionColor,
+                                                fontSize: 24,
+                                              ),
+                                              child: const Text('Log in'),
+                                            ),
                                           ),
                                         ),
                                       ),
-                                    ),
+                                      
+                                      // Botão Sign in
+                                      Expanded(
+                                        child: GestureDetector(
+                                          onTap: () => setState(() => isLogin = false),
+                                          behavior: HitTestBehavior.opaque, // <-- Importante: Permite clicar na área transparente!
+                                          child: Container(
+                                            alignment: Alignment.center,
+                                            child: AnimatedDefaultTextStyle(
+                                              duration: const Duration(milliseconds: 300),
+                                              style: AppTextStyles.bodyBold.copyWith(
+                                                color: !isLogin ? AppColors.white : primaryActionColor,
+                                                fontSize: 24,
+                                              ),
+                                              child: const Text('Sign in'),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
