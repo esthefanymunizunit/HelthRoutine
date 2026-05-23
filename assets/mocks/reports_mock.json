@@ -1,0 +1,22 @@
+{
+  "progressCircle": {
+    "pink": 0.7,
+    "blue": 0.5,
+    "green": 0.8
+  },
+  "weeklyChart": [
+    {"day": "S", "value": 0.4},
+    {"day": "T", "value": 0.8},
+    {"day": "T", "value": 0.9, "highlight": true},
+    {"day": "Q", "value": 0.6},
+    {"day": "Q", "value": 0.7},
+    {"day": "S", "value": 0.5},
+    {"day": "D", "value": 0.3}
+  ],
+  "stats": {
+    "sundayReset": "3/4",
+    "activity": "85%"
+  },
+  "insight": "Sua constância em meditação subiu 30 %",
+  "constancyData": [10, 40, 35, 50, 45, 80]
+}

@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
       final data = await json.decode(response);
       setState(() {
         mockData = data;
-        isLoading = false; 
+        isLoading = false;
       });
     } catch (e) {
       debugPrint("Erro ao carregar o mock: $e");
@@ -224,10 +224,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: CustomBottomNav.buildFAB(context),
-      bottomNavigationBar: const CustomBottomNav(),
     );
   }
 

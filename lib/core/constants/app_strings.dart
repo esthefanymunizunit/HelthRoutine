@@ -32,4 +32,14 @@ class AppStrings {
   static const String addTimerLabel = 'Adicionar Temporizador';
   static const String notificationsLabel = 'Notificações';
   static const String btnAddTask = 'Adicionar Tarefa';
+
+  // Reports
+  static const String reportsTitle = 'Sua Jornada';
+  static const String reportsSubtitle =
+      'Celebrando cada passo em direção ao equilíbrio.';
+  static const String weeklySummary = 'Resumo Semanal';
+  static const String sundayReset = 'Domingo Reset';
+  static const String physicalActivity = 'Atividade Física';
+  static const String insightTitle = 'Insight';
+  static const String constancyIndex = 'Índice de constância';
 }
