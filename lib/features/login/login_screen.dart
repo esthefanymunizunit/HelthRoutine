@@ -19,8 +19,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    const Color primaryActionColor = AppColors.cloudBlue; 
-
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
