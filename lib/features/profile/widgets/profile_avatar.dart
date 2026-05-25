@@ -11,18 +11,17 @@ class ProfileAvatar extends StatelessWidget {
       children: [
         Container(
           padding: const EdgeInsets.all(4),
-          decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.cloudBlue),
+          decoration: const BoxDecoration(shape: BoxShape.circle, color: AppColors.borderBlue),
           child: const CircleAvatar(
             radius: 70,
             backgroundColor: Color(0xFFFFE4D1),
-            backgroundImage: AssetImage('assets/images/avatar_placeholder.png'), // Adicione sua imagem aqui
           ),
         ),
         CircleAvatar(
           radius: 20,
-          backgroundColor: AppColors.cloudBlue,
+          backgroundColor: AppColors.borderBlue,
           child: IconButton(
-            icon: const Icon(Icons.camera_alt_outlined, color: Colors.white, size: 20),
+            icon: const Icon(Icons.camera_alt_outlined, color: Colors.black, size: 20),
             onPressed: () {},
           ),
         ),

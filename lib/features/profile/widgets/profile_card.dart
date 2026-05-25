@@ -25,7 +25,7 @@ class ProfileSectionCard extends StatelessWidget {
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(30),
-            border: Border.all(color: AppColors.cloudBlue.withValues(alpha: 0.3)),
+            border: Border.all(color: AppColors.cloudBlue),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,7 +49,8 @@ class ProfileSectionCard extends StatelessWidget {
             child: FloatingActionButton.small(
               onPressed: () {},
               backgroundColor: AppColors.cloudBlue,
-              child: const Icon(Icons.edit, color: Colors.white),
+              shape: CircleBorder(),
+              child: const Icon(Icons.edit, color: Colors.black),
             ),
           ),
       ],
