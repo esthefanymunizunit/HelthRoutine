@@ -65,11 +65,8 @@ class _ReportsPageState extends State<ReportsPage> {
                 ),
                 const SizedBox(height: 40),
 
-                // Círculos de Progresso (Agora fiéis ao design)
                 const ProgressCircleSection(),
                 const SizedBox(height: 40),
-
-                // Resumo Semanal e Tag flutuante
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -77,7 +74,6 @@ class _ReportsPageState extends State<ReportsPage> {
                       AppStrings.weeklySummary,
                       style: AppTextStyles.heading2.copyWith(fontSize: 14),
                     ),
-                    // Tag "+10% vs semana passada"
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 12,
@@ -87,17 +83,17 @@ class _ReportsPageState extends State<ReportsPage> {
                         color: Colors.grey.shade200,
                         borderRadius: BorderRadius.circular(16),
                       ),
-                      child: const Row(
+                      child: Row(
                         children: [
-                          Icon(
+                          const Icon(
                             Icons.arrow_upward,
                             size: 14,
                             color: AppColors.cloudBlue,
                           ),
-                          SizedBox(width: 4),
+                          const SizedBox(width: 4),
                           Text(
-                            '+10% vs semana passada',
-                            style: TextStyle(
+                            AppStrings.weeklyComparison,
+                            style: const TextStyle(
                               fontSize: 10,
                               fontWeight: FontWeight.bold,
                               color: Colors.black54,
@@ -110,11 +106,9 @@ class _ReportsPageState extends State<ReportsPage> {
                 ),
                 const SizedBox(height: 24),
 
-                // Gráfico de Barras com a linha base
                 WeeklyBarChart(data: mockData!['weeklyChart']),
                 const SizedBox(height: 32),
 
-                // Cards de estatísticas (Domingo Reset e Atividade)
                 Row(
                   children: [
                     _buildSmallStatCard(
@@ -135,7 +129,6 @@ class _ReportsPageState extends State<ReportsPage> {
 
                 const SizedBox(height: 24),
 
-                // Insight Card (Agora branco com borda, igual ao Figma)
                 Container(
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
@@ -166,18 +159,12 @@ class _ReportsPageState extends State<ReportsPage> {
                           ],
                         ),
                       ),
-                      // Ícone roxo do design
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppColors.templatePurpleLight,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: const Icon(
-                          Icons.sentiment_satisfied_alt,
-                          size: 32,
-                          color: AppColors.black,
-                        ),
+                      // Sua imagem roxa exportada do Figma
+                      Image.asset(
+                        'assets/images/icon-roxo-feliz.png',
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.contain,
                       ),
                     ],
                   ),
@@ -191,7 +178,6 @@ class _ReportsPageState extends State<ReportsPage> {
     );
   }
 
-  // Atualizado para suportar barra linear ou barra circular
   Widget _buildSmallStatCard({
     required String title,
     required String value,

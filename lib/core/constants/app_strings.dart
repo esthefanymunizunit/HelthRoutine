@@ -38,6 +38,7 @@ class AppStrings {
   static const String reportsSubtitle =
       'Celebrando cada passo em direção ao equilíbrio.';
   static const String weeklySummary = 'Resumo Semanal';
+  static const String weeklyComparison = '+10% vs semana passada';
   static const String sundayReset = 'Domingo Reset';
   static const String physicalActivity = 'Atividade Física';
   static const String insightTitle = 'Insight';
