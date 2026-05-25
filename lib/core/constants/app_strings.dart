@@ -43,4 +43,28 @@ class AppStrings {
   static const String physicalActivity = 'Atividade Física';
   static const String insightTitle = 'Insight';
   static const String constancyIndex = 'Índice de constância';
+
+  // Templates
+  static const String templatesHeader = 'Domingo Reset';
+  static const String templatesDesc =
+      'Recarregue a mente e organize sua semana com um catálogo de rotinas prontas para você escolher e adaptar à sua semana.';
+  static const String templatesSectionTitle = 'Templates';
+  static const String tplFocoTitle = 'Foco nos estudos';
+  static const String tplFocoDesc =
+      'uma sessão de estudos perfeita: mais foco e pausas inteligentes para não esgotar a mente.';
+  static const String tplSemanaTitle = 'Semana Sob Controle';
+  static const String tplSemanaDesc =
+      'Organize seus compromissos e metas para evitar a ansiedade da segunda-feira.';
+  static const String tplAmbienteTitle = 'Ambiente Renovado';
+  static const String tplAmbienteDesc =
+      'Um espaço limpo traz clareza mental. Prepare seu ambiente físico.';
+  static const String tplCorpoTitle = 'Corpo Ativo e Nutrido';
+  static const String tplCorpoDesc =
+      'Acorde o corpo suavemente e prepare sua rotina de saúde física.';
+
+  // --- Tela de Detalhes do Template ---
+  static const String templatePersonalizeTitle = 'Personalizar Template';
+  static const String templateAddRoutineBtn = '+ Adicionar a minha Rotina';
+  static const String templateTimeLabel = 'Horário : ';
+  static const String templateNotificationsLabel = 'Notificações';
 }

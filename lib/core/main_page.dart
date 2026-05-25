@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:healthroutine/core/widgets/custom_bottom_nav.dart';
 import '../../features/home/pages/home_page.dart';
 import '../../features/reports/pages/reports_page.dart';
+import '../features/feature-template/pages/templates_page.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -14,7 +15,7 @@ class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
     const HomePage(),
-    const Center(child: Text('Templates (Em breve)')),
+    const TemplatesPage(), 
     const ReportsPage(),
     const Center(child: Text('Perfil (Em breve)')),
   ];
