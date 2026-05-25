@@ -22,7 +22,6 @@ class ProfileMenuTile extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          // Texto e Subtexto
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -37,7 +36,6 @@ class ProfileMenuTile extends StatelessWidget {
                 ),
             ],
           ),
-          // Parte Direita: Switch, Seta ou nada
           if (trailing != null)
             trailing!
           else if (showArrow)

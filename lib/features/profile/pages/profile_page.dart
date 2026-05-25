@@ -19,7 +19,6 @@ class _ProfilePageState extends State<ProfilePage>{
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Usando o FAB que você já definiu na sua classe
       floatingActionButton: CustomBottomNav.buildFAB(context),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: const CustomBottomNav(),
