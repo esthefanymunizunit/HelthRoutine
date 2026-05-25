@@ -14,6 +14,7 @@ import '../widgets/low_energy_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+  static final ValueNotifier<String?> novaTarefaNotifier = ValueNotifier(null);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -29,6 +30,26 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadMockData();
+    HomePage.novaTarefaNotifier.addListener(_onNovaTarefaAdicionada);
+  }
+
+  @override
+  void dispose() {
+    HomePage.novaTarefaNotifier.removeListener(_onNovaTarefaAdicionada);
+    super.dispose();
+  }
+
+  void _onNovaTarefaAdicionada() {
+    final novaTarefa = HomePage.novaTarefaNotifier.value;
+    if (novaTarefa != null && mockData != null && !isLowEnergyMode) {
+      setState(() {
+        mockData!['normalActivities'].insert(0, {
+          'title': novaTarefa,
+          'colorKey': 'blue', 
+        });
+      });
+      HomePage.novaTarefaNotifier.value = null;
+    }
   }
 
   Future<void> _loadMockData() async {
@@ -97,7 +118,6 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // CABEÇALHO (Header)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -108,7 +128,6 @@ class _HomePageState extends State<HomePage> {
                           style: AppTextStyles.heading1,
                         ),
                         const SizedBox(width: 8),
-                        // Imagem da estrela customizada
                         Image.asset(
                           'assets/images/estrela1.png',
                           width: 32,
@@ -117,11 +136,9 @@ class _HomePageState extends State<HomePage> {
                         ),
                       ],
                     ),
-                    // ALTERADO: Ícone genérico substituído pela imagem de perfil
                     const CircleAvatar(
                       radius: 24,
                       backgroundColor: Colors.white,
-                      // Forma padrão do Flutter para imagem de perfil arredondada
                       backgroundImage: AssetImage(
                         'assets/images/icon-perfil.png',
                       ),
@@ -133,7 +150,6 @@ class _HomePageState extends State<HomePage> {
                 isLowEnergyMode ? _buildLowEnergyBanner() : _buildCheckInCard(),
                 const SizedBox(height: 32),
 
-                // SEÇÃO ATIVIDADES
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -168,7 +184,6 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 16),
 
-                // LISTA DE ATIVIDADES
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -192,7 +207,6 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 32),
 
-                // SEÇÃO SUGESTÕES
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -229,9 +243,7 @@ class _HomePageState extends State<HomePage> {
                       )
                       .toList(),
                 ),
-                const SizedBox(
-                  height: 80,
-                ), // Espaço para o FAB não cobrir conteúdo
+                const SizedBox(height: 80),
               ],
             ),
           ),

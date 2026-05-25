@@ -8,7 +8,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../widgets/task_form_label.dart';
 import '../widgets/task_dropdown_button.dart';
 import '../widgets/day_selector_button.dart';
-import '../widgets/success_dialog.dart'; // Import da nossa nova animação!
+import '../widgets/success_dialog.dart';
 
 class CreateTaskPage extends StatefulWidget {
   final bool isEditing;
@@ -93,7 +93,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // A estrela agora rola junto com o formulário
                   Center(
                     child: Padding(
                       padding: const EdgeInsets.only(bottom: 24.0),
@@ -106,7 +105,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                     ),
                   ),
 
-                  // Nome da Tarefa
                   const TaskFormLabel(text: AppStrings.taskNameLabel),
                   const SizedBox(height: 8),
                   TextField(
@@ -181,7 +179,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Repetir em
                   const TaskFormLabel(text: AppStrings.repeatLabel),
                   const SizedBox(height: 12),
                   Row(
@@ -225,23 +222,26 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Botão Adicionar/Salvar Tarefa com Animação
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        // 1. Oculta o teclado
+                        // 1. Pega o texto
+                        final nomeDaNovaTarefa = _titleController.text;
+
+                        // Se estiver vazio, não faz nada
+                        if (nomeDaNovaTarefa.trim().isEmpty) return;
+
                         FocusScope.of(context).unfocus();
 
-                        // 2. Exibe o modal animado de sucesso
+                        // 2. Mostra a animação e depois de fechar, devolve o texto
                         showDialog(
                           context: context,
                           barrierDismissible: false,
                           builder: (context) => const SuccessDialog(),
                         ).then((_) {
-                          // 3. Após fechar o modal, fecha a própria tela
                           if (context.mounted) {
-                            Navigator.of(context).pop();
+                            Navigator.of(context).pop(nomeDaNovaTarefa);
                           }
                         });
                       },

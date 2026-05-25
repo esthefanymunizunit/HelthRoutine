@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:healthroutine/features/tasks/pages/creeate_task_page.dart';
+import '../../features/home/pages/home_page.dart';
 import '../constants/app_strings.dart';
 import '../theme/app_colors.dart';
 import 'bottom_nav_icon.dart';
@@ -66,8 +67,8 @@ class CustomBottomNav extends StatelessWidget {
 
   static FloatingActionButton buildFAB(BuildContext context) {
     return FloatingActionButton(
-      onPressed: () {
-        showModalBottomSheet(
+      onPressed: () async {
+        final novaTarefa = await showModalBottomSheet<String>(
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
@@ -76,6 +77,10 @@ class CustomBottomNav extends StatelessWidget {
             child: CreateTaskPage(),
           ),
         );
+
+        if (novaTarefa != null && novaTarefa.isNotEmpty) {
+          HomePage.novaTarefaNotifier.value = novaTarefa;
+        }
       },
       backgroundColor: AppColors.black,
       shape: const CircleBorder(),
