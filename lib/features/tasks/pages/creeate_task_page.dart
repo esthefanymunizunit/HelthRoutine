@@ -8,15 +8,21 @@ import '../../../core/theme/app_text_styles.dart';
 import '../widgets/task_form_label.dart';
 import '../widgets/task_dropdown_button.dart';
 import '../widgets/day_selector_button.dart';
+import '../widgets/success_dialog.dart'; // Import da nossa nova animação!
 
 class CreateTaskPage extends StatefulWidget {
-  const CreateTaskPage({super.key});
+  final bool isEditing;
+  final String? initialTitle;
+
+  const CreateTaskPage({super.key, this.isEditing = false, this.initialTitle});
 
   @override
   State<CreateTaskPage> createState() => _CreateTaskPageState();
 }
 
 class _CreateTaskPageState extends State<CreateTaskPage> {
+  late TextEditingController _titleController;
+
   bool isEssential = true;
   bool hasTimer = false;
   bool hasNotifications = true;
@@ -34,6 +40,18 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.initialTitle ?? '');
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       color: AppColors.backgroundOffWhite,
@@ -45,7 +63,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(AppStrings.newTaskTitle, style: AppTextStyles.heading1),
+              Text(
+                widget.isEditing ? 'Editar Tarefa' : AppStrings.newTaskTitle,
+                style: AppTextStyles.heading1,
+              ),
               GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Container(
@@ -65,26 +86,31 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             ],
           ),
 
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 24.0),
-              child: Icon(
-                Icons.face_retouching_natural,
-                color: AppColors.starYellow,
-                size: 64,
-              ),
-            ),
-          ),
+          const SizedBox(height: 16),
 
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // A estrela agora rola junto com o formulário
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0),
+                      child: Image.asset(
+                        'assets/images/estrela-tarefa.png',
+                        width: 200,
+                        height: 200,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+
                   // Nome da Tarefa
                   const TaskFormLabel(text: AppStrings.taskNameLabel),
                   const SizedBox(height: 8),
                   TextField(
+                    controller: _titleController,
                     style: const TextStyle(color: AppColors.black),
                     decoration: InputDecoration(
                       hintText: AppStrings.taskNameHint,
@@ -199,12 +225,25 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Botão Adicionar Tarefa
+                  // Botão Adicionar/Salvar Tarefa com Animação
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        // 1. Oculta o teclado
+                        FocusScope.of(context).unfocus();
+
+                        // 2. Exibe o modal animado de sucesso
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => const SuccessDialog(),
+                        ).then((_) {
+                          // 3. Após fechar o modal, fecha a própria tela
+                          if (context.mounted) {
+                            Navigator.of(context).pop();
+                          }
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.blueVariant,
@@ -215,7 +254,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                         elevation: 0,
                       ),
                       child: Text(
-                        AppStrings.btnAddTask,
+                        widget.isEditing
+                            ? 'Salvar Edição'
+                            : AppStrings.btnAddTask,
                         style: AppTextStyles.bodyBold.copyWith(fontSize: 16),
                       ),
                     ),

@@ -6,7 +6,6 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_background.dart';
-import '../../../core/widgets/custom_bottom_nav.dart';
 
 import '../widgets/mood_icon.dart';
 import '../widgets/activity_card.dart';
@@ -98,6 +97,7 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // CABEÇALHO (Header)
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -108,17 +108,23 @@ class _HomePageState extends State<HomePage> {
                           style: AppTextStyles.heading1,
                         ),
                         const SizedBox(width: 8),
-                        const Icon(
-                          Icons.face_retouching_natural,
-                          color: AppColors.starYellow,
-                          size: 32,
+                        // Imagem da estrela customizada
+                        Image.asset(
+                          'assets/images/estrela1.png',
+                          width: 32,
+                          height: 32,
+                          fit: BoxFit.contain,
                         ),
                       ],
                     ),
+                    // ALTERADO: Ícone genérico substituído pela imagem de perfil
                     const CircleAvatar(
                       radius: 24,
                       backgroundColor: Colors.white,
-                      child: Icon(Icons.person, color: AppColors.activityBlue),
+                      // Forma padrão do Flutter para imagem de perfil arredondada
+                      backgroundImage: AssetImage(
+                        'assets/images/icon-perfil.png',
+                      ),
                     ),
                   ],
                 ),
@@ -127,6 +133,7 @@ class _HomePageState extends State<HomePage> {
                 isLowEnergyMode ? _buildLowEnergyBanner() : _buildCheckInCard(),
                 const SizedBox(height: 32),
 
+                // SEÇÃO ATIVIDADES
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -161,6 +168,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 const SizedBox(height: 16),
 
+                // LISTA DE ATIVIDADES
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -183,6 +191,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
                 const SizedBox(height: 32),
+
+                // SEÇÃO SUGESTÕES
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -201,6 +211,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 16),
+
                 Row(
                   children: currentSuggestions
                       .map(
@@ -218,7 +229,9 @@ class _HomePageState extends State<HomePage> {
                       )
                       .toList(),
                 ),
-                const SizedBox(height: 80),
+                const SizedBox(
+                  height: 80,
+                ), // Espaço para o FAB não cobrir conteúdo
               ],
             ),
           ),
@@ -247,22 +260,22 @@ class _HomePageState extends State<HomePage> {
               MoodIcon(
                 color: AppColors.moodAnimada,
                 label: 'Animada',
-                icon: Icons.sentiment_satisfied_alt,
+                imagePath: 'assets/images/icon-animada.png',
               ),
               MoodIcon(
                 color: AppColors.moodSensivel,
                 label: 'Sensível',
-                icon: Icons.sentiment_neutral,
+                imagePath: 'assets/images/icon-sensivel.png',
               ),
               MoodIcon(
                 color: AppColors.moodBrava,
                 label: 'Brava',
-                icon: Icons.sentiment_very_dissatisfied,
+                imagePath: 'assets/images/icon-brava.png',
               ),
               MoodIcon(
                 color: AppColors.moodInsegura,
                 label: 'Insegura',
-                icon: Icons.remove_red_eye,
+                imagePath: 'assets/images/icon-insegura.png',
               ),
             ],
           ),
