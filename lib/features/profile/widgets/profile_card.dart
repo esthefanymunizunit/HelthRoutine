@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:healthroutine/core/theme/app_colors.dart';
+import '../../../core/theme/app_colors.dart';
 
 class ProfileSectionCard extends StatelessWidget {
   final String title;
@@ -7,10 +7,10 @@ class ProfileSectionCard extends StatelessWidget {
   final bool showEditButton;
 
   const ProfileSectionCard({
-    super.key, 
-    required this.title, 
-    required this.children, 
-    this.showEditButton = false
+    super.key,
+    required this.title,
+    required this.children,
+    this.showEditButton = false,
   });
 
   @override
@@ -20,6 +20,7 @@ class ProfileSectionCard extends StatelessWidget {
       alignment: Alignment.bottomCenter,
       children: [
         Container(
+          width: double.infinity,
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -29,7 +30,14 @@ class ProfileSectionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.grey)),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
               const SizedBox(height: 15),
               ...children,
             ],
