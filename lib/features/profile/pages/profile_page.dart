@@ -6,8 +6,15 @@ import 'package:healthroutine/features/profile/widgets/profile_title.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/custom_bottom_nav.dart';
 
-class ProfilePage extends StatelessWidget {
+class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage>{
+  bool _notificationBtn = true;
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +55,7 @@ class ProfilePage extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
 
               // --- SEÇÃO: CONFIGURAÇÃO ---
               ProfileSectionCard(
@@ -57,17 +64,24 @@ class ProfilePage extends StatelessWidget {
                   ProfileMenuTile(
                     label: "Notificações", 
                     trailing: Switch(
-                      value: true, 
-                      onChanged: (v) {},
-                      activeThumbColor: AppColors.cloudBlue,
+                      value: _notificationBtn, 
+                      onChanged: (bool novoValor) {
+                        setState(() {
+                          _notificationBtn = novoValor;
+                        });
+                      },
+                      activeTrackColor: AppColors.borderBlue,
+                      activeThumbColor: AppColors.white,
+                      inactiveTrackColor: AppColors.white,
+                      inactiveThumbColor: AppColors.borderBlue,
                     ),
                   ),
-                  const ProfileMenuTile(label: "Idioma", subLabel: "Português (BR)"),
+                  const ProfileMenuTile(label: "Idioma :", subLabel: "Português (BR)"),
                   const ProfileMenuTile(label: "Gerenciar Hábitos"),
                 ],
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 25),
 
               // --- SEÇÃO: SOBRE ---
               const ProfileSectionCard(
@@ -80,16 +94,16 @@ class ProfilePage extends StatelessWidget {
                 ],
               ),
 
-              const SizedBox(height: 30),
+              const SizedBox(height: 25),
 
               // --- BOTÃO SAIR ---
               SizedBox(
-                width: double.infinity,
-                height: 50,
+                width: 238,
+                height: 35,
                 child: ElevatedButton(
                   onPressed: () {},
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.cloudBlue,
+                    backgroundColor: AppColors.borderBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                   ),
                   child: const Text("Sair", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
