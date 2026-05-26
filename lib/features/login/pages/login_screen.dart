@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:healthroutine/core/widgets/auth_toggle_switch.dart';
-import 'package:healthroutine/core/widgets/custom_text_field.dart';
-import 'package:healthroutine/core/widgets/primary_button.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../../core/theme/app_text_styles.dart';
+import 'package:healthroutine/features/login/widgets/auth_toggle_switch.dart';
+import 'package:healthroutine/features/login/widgets/custom_text_field.dart';
+import 'package:healthroutine/features/login/widgets/primary_button.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import '../../core/widgets/app_background.dart';
+import '../../../core/widgets/app_background.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

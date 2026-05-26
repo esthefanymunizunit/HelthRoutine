@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:healthroutine/core/theme/app_theme.dart';
-import 'package:healthroutine/features/login/login_screen.dart';
+import 'package:healthroutine/features/login/pages/login_screen.dart';
 
 void main() {
   runApp(const MyApp());
