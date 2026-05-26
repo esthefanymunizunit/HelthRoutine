@@ -1,0 +1,40 @@
+{
+  "normalActivities": [
+    {
+      "title": "Caminhar com o cachorro",
+      "colorKey": "pink"
+    },
+    {
+      "title": "Estudar",
+      "colorKey": "blue"
+    },
+    {
+      "title": "Meditação Rápida",
+      "colorKey": "green"
+    }
+  ],
+  "lowEnergyActivities": [
+    {
+      "title": "Alongamento Curto",
+      "colorKey": "pink"
+    },
+    {
+      "title": "Beber água",
+      "colorKey": "blue"
+    },
+    {
+      "title": "Meditar",
+      "colorKey": "green"
+    }
+  ],
+  "suggestions": [
+    {
+      "title": "Dica de nutrição",
+      "subtitle": "Alimentos que ajudam..."
+    },
+    {
+      "title": "Técnica de meditação",
+      "subtitle": ""
+    }
+  ]
+}
