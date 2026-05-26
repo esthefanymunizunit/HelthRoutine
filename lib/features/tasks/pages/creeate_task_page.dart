@@ -8,17 +8,31 @@ import '../../../core/theme/app_text_styles.dart';
 import '../widgets/task_form_label.dart';
 import '../widgets/task_dropdown_button.dart';
 import '../widgets/day_selector_button.dart';
+import '../widgets/success_dialog.dart';
 
 class CreateTaskPage extends StatefulWidget {
-  const CreateTaskPage({super.key});
+  final bool isEditing;
+  final String? initialTitle;
+
+  const CreateTaskPage({super.key, this.isEditing = false, this.initialTitle});
 
   @override
   State<CreateTaskPage> createState() => _CreateTaskPageState();
 }
 
 class _CreateTaskPageState extends State<CreateTaskPage> {
+  static const int _minTimerDurationMinutes = 5;
+  static const int _pomodoroMinTimerDurationMinutes = 25;
+  static const int _maxTimerDurationMinutes = 120;
+  static const int _defaultTimerDurationMinutes = 25;
+  static const int _timerDurationStepMinutes = 5;
+
+  late TextEditingController _titleController;
+
   bool isEssential = true;
   bool hasTimer = false;
+  int timerDurationMinutes = _defaultTimerDurationMinutes;
+  bool isPomodoro = false;
   bool hasNotifications = true;
 
   DateTime? selectedDate;
@@ -26,11 +40,33 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   List<bool> selectedDays = [false, false, true, false, true, false, false];
   final List<String> daysOfWeek = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
+  void _adjustTimerDurationByMinutes(int deltaMinutes) {
+    final int effectiveMinMinutes = isPomodoro
+        ? _pomodoroMinTimerDurationMinutes
+        : _minTimerDurationMinutes;
+    setState(() {
+      timerDurationMinutes = (timerDurationMinutes + deltaMinutes)
+          .clamp(effectiveMinMinutes, _maxTimerDurationMinutes);
+    });
+  }
+
   String get formattedDate {
     if (selectedDate == null) return AppStrings.addDateBtn;
     String day = selectedDate!.day.toString().padLeft(2, '0');
     String month = selectedDate!.month.toString().padLeft(2, '0');
     return "$day/$month/${selectedDate!.year}";
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _titleController = TextEditingController(text: widget.initialTitle ?? '');
+  }
+
+  @override
+  void dispose() {
+    _titleController.dispose();
+    super.dispose();
   }
 
   @override
@@ -45,7 +81,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(AppStrings.newTaskTitle, style: AppTextStyles.heading1),
+              Text(
+                widget.isEditing ? 'Editar Tarefa' : AppStrings.newTaskTitle,
+                style: AppTextStyles.heading1,
+              ),
               GestureDetector(
                 onTap: () => Navigator.of(context).pop(),
                 child: Container(
@@ -65,26 +104,29 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
             ],
           ),
 
-          const Center(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 24.0),
-              child: Icon(
-                Icons.face_retouching_natural,
-                color: AppColors.starYellow,
-                size: 64,
-              ),
-            ),
-          ),
+          const SizedBox(height: 16),
 
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Nome da Tarefa
+                  Center(
+                    child: Padding(
+                      padding: const EdgeInsets.only(bottom: 24.0),
+                      child: Image.asset(
+                        'assets/images/estrela-tarefa.png',
+                        width: 200,
+                        height: 200,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+
                   const TaskFormLabel(text: AppStrings.taskNameLabel),
                   const SizedBox(height: 8),
                   TextField(
+                    controller: _titleController,
                     style: const TextStyle(color: AppColors.black),
                     decoration: InputDecoration(
                       hintText: AppStrings.taskNameHint,
@@ -155,7 +197,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Repetir em
                   const TaskFormLabel(text: AppStrings.repeatLabel),
                   const SizedBox(height: 12),
                   Row(
@@ -184,6 +225,77 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                       ),
                     ],
                   ),
+                  if (hasTimer) ...[
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const TaskFormLabel(
+                          text: AppStrings.createTaskDurationLabel,
+                        ),
+                        Row(
+                          children: [
+                            IconButton(
+                              onPressed: () => _adjustTimerDurationByMinutes(
+                                -_timerDurationStepMinutes,
+                              ),
+                              icon: const Icon(
+                                Icons.remove,
+                                color: AppColors.black,
+                                size: 22,
+                              ),
+                            ),
+                            SizedBox(
+                              width: 70,
+                              child: Text(
+                                AppStrings.createTaskDurationValue(
+                                  timerDurationMinutes,
+                                ),
+                                textAlign: TextAlign.center,
+                                style: AppTextStyles.heading2.copyWith(
+                                  color: AppColors.cloudBlue,
+                                  fontSize: 16,
+                                ),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () => _adjustTimerDurationByMinutes(
+                                _timerDurationStepMinutes,
+                              ),
+                              icon: const Icon(
+                                Icons.add,
+                                color: AppColors.black,
+                                size: 22,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const TaskFormLabel(
+                          text: AppStrings.timerMethodPomodoro,
+                        ),
+                        Checkbox(
+                          value: isPomodoro,
+                          activeColor: AppColors.blueVariant,
+                          onChanged: (value) {
+                            setState(() {
+                              isPomodoro = value ?? false;
+                              if (isPomodoro &&
+                                  timerDurationMinutes <
+                                      _pomodoroMinTimerDurationMinutes) {
+                                timerDurationMinutes =
+                                    _pomodoroMinTimerDurationMinutes;
+                              }
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -199,12 +311,31 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   ),
                   const SizedBox(height: 32),
 
-                  // Botão Adicionar Tarefa
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.of(context).pop();
+                        final nomeDaNovaTarefa = _titleController.text;
+
+                        if (nomeDaNovaTarefa.trim().isEmpty) return;
+
+                        FocusScope.of(context).unfocus();
+
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (context) => const SuccessDialog(),
+                        ).then((_) {
+                          if (context.mounted) {
+                            Navigator.of(context).pop(<String, dynamic>{
+                              'title': nomeDaNovaTarefa,
+                              'hasTimer': hasTimer,
+                              if (hasTimer)
+                                'timerDurationMinutes': timerDurationMinutes,
+                              if (hasTimer) 'isPomodoro': isPomodoro,
+                            });
+                          }
+                        });
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.blueVariant,
@@ -215,7 +346,9 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                         elevation: 0,
                       ),
                       child: Text(
-                        AppStrings.btnAddTask,
+                        widget.isEditing
+                            ? 'Salvar Edição'
+                            : AppStrings.btnAddTask,
                         style: AppTextStyles.bodyBold.copyWith(fontSize: 16),
                       ),
                     ),

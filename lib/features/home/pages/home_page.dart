@@ -6,8 +6,8 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_background.dart';
-import '../../../core/widgets/custom_bottom_nav.dart';
 
+import '../../timer/pages/timer_page.dart';
 import '../widgets/mood_icon.dart';
 import '../widgets/activity_card.dart';
 import '../widgets/suggestion_card.dart';
@@ -15,6 +15,8 @@ import '../widgets/low_energy_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+  static final ValueNotifier<Map<String, dynamic>?> novaTarefaNotifier =
+      ValueNotifier(null);
 
   @override
   State<HomePage> createState() => _HomePageState();
@@ -26,10 +28,88 @@ class _HomePageState extends State<HomePage> {
   Map<String, dynamic>? mockData;
   bool isLoading = true;
 
+  final Set<String> _activitiesCompletedViaTimer = <String>{};
+
   @override
   void initState() {
     super.initState();
     _loadMockData();
+    HomePage.novaTarefaNotifier.addListener(_onNovaTarefaAdicionada);
+  }
+
+  @override
+  void dispose() {
+    HomePage.novaTarefaNotifier.removeListener(_onNovaTarefaAdicionada);
+    super.dispose();
+  }
+
+  void _onNovaTarefaAdicionada() {
+    final novaTarefa = HomePage.novaTarefaNotifier.value;
+    if (novaTarefa == null || mockData == null || isLowEnergyMode) return;
+
+    final bool tarefaTemTimer = novaTarefa['hasTimer'] == true;
+    final novaAtividade = <String, dynamic>{
+      'title': novaTarefa['title'],
+      'colorKey': 'blue',
+      'hasTimer': tarefaTemTimer,
+      if (tarefaTemTimer)
+        'timerDurationMinutes': novaTarefa['timerDurationMinutes'],
+      if (tarefaTemTimer) 'isPomodoro': novaTarefa['isPomodoro'] == true,
+    };
+
+    setState(() {
+      mockData!['normalActivities'].insert(0, novaAtividade);
+    });
+    HomePage.novaTarefaNotifier.value = null;
+  }
+
+  void _handleActivityEdited(
+    Map<String, dynamic> activity,
+    Map<String, dynamic> updatedTask,
+  ) {
+    final String oldTitle = activity['title'] as String;
+    final bool tarefaTemTimer = updatedTask['hasTimer'] == true;
+    final String newTitle = updatedTask['title'] as String;
+
+    setState(() {
+      activity['title'] = newTitle;
+      activity['hasTimer'] = tarefaTemTimer;
+      if (tarefaTemTimer) {
+        activity['timerDurationMinutes'] =
+            updatedTask['timerDurationMinutes'];
+        activity['isPomodoro'] = updatedTask['isPomodoro'] == true;
+      } else {
+        activity.remove('timerDurationMinutes');
+        activity.remove('isPomodoro');
+      }
+      _activitiesCompletedViaTimer.remove(oldTitle);
+    });
+  }
+
+  Future<void> _handleActivityCirclePressed(
+    Map<String, dynamic> activity,
+  ) async {
+    final String activityTitle = activity['title'] as String;
+
+    if (_activitiesCompletedViaTimer.contains(activityTitle)) {
+      setState(() => _activitiesCompletedViaTimer.remove(activityTitle));
+      return;
+    }
+
+    final completedViaTimer = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => TimerPage(
+          taskTitle: activityTitle,
+          workDurationMinutes: activity['timerDurationMinutes'] as int?,
+          isPomodoro: activity['isPomodoro'] == true,
+        ),
+      ),
+    );
+
+    if (!mounted) return;
+    if (completedViaTimer == true) {
+      setState(() => _activitiesCompletedViaTimer.add(activityTitle));
+    }
   }
 
   Future<void> _loadMockData() async {
@@ -40,7 +120,7 @@ class _HomePageState extends State<HomePage> {
       final data = await json.decode(response);
       setState(() {
         mockData = data;
-        isLoading = false; 
+        isLoading = false;
       });
     } catch (e) {
       debugPrint("Erro ao carregar o mock: $e");
@@ -108,17 +188,20 @@ class _HomePageState extends State<HomePage> {
                           style: AppTextStyles.heading1,
                         ),
                         const SizedBox(width: 8),
-                        const Icon(
-                          Icons.face_retouching_natural,
-                          color: AppColors.starYellow,
-                          size: 32,
+                        Image.asset(
+                          'assets/images/estrela1.png',
+                          width: 32,
+                          height: 32,
+                          fit: BoxFit.contain,
                         ),
                       ],
                     ),
                     const CircleAvatar(
                       radius: 24,
                       backgroundColor: Colors.white,
-                      child: Icon(Icons.person, color: AppColors.activityBlue),
+                      backgroundImage: AssetImage(
+                        'assets/images/icon-perfil.png',
+                      ),
                     ),
                   ],
                 ),
@@ -169,20 +252,34 @@ class _HomePageState extends State<HomePage> {
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   child: Column(
-                    children: currentActivities
-                        .map(
-                          (activity) => Padding(
-                            padding: const EdgeInsets.only(bottom: 12.0),
-                            child: ActivityCard(
-                              color: _getColor(activity['colorKey']),
-                              title: activity['title'],
-                            ),
+                    children: currentActivities.map((activity) {
+                      final String activityTitle = activity['title'] as String;
+                      final bool activityHasTimer = activity['hasTimer'] == true;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: ActivityCard(
+                          color: _getColor(activity['colorKey']),
+                          title: activityTitle,
+                          isExternallyCompleted:
+                              _activitiesCompletedViaTimer.contains(
+                            activityTitle,
                           ),
-                        )
-                        .toList(),
+                          onCirclePressed: activityHasTimer
+                              ? () => _handleActivityCirclePressed(
+                                    activity as Map<String, dynamic>,
+                                  )
+                              : null,
+                          onEdited: (updatedTask) => _handleActivityEdited(
+                            activity as Map<String, dynamic>,
+                            updatedTask,
+                          ),
+                        ),
+                      );
+                    }).toList(),
                   ),
                 ),
                 const SizedBox(height: 32),
+
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -201,6 +298,7 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 16),
+
                 Row(
                   children: currentSuggestions
                       .map(
@@ -224,10 +322,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      floatingActionButton: CustomBottomNav.buildFAB(context),
-      bottomNavigationBar: const CustomBottomNav(),
     );
   }
 
@@ -251,22 +345,22 @@ class _HomePageState extends State<HomePage> {
               MoodIcon(
                 color: AppColors.moodAnimada,
                 label: 'Animada',
-                icon: Icons.sentiment_satisfied_alt,
+                imagePath: 'assets/images/icon-animada.png',
               ),
               MoodIcon(
                 color: AppColors.moodSensivel,
                 label: 'Sensível',
-                icon: Icons.sentiment_neutral,
+                imagePath: 'assets/images/icon-sensivel.png',
               ),
               MoodIcon(
                 color: AppColors.moodBrava,
                 label: 'Brava',
-                icon: Icons.sentiment_very_dissatisfied,
+                imagePath: 'assets/images/icon-brava.png',
               ),
               MoodIcon(
                 color: AppColors.moodInsegura,
                 label: 'Insegura',
-                icon: Icons.remove_red_eye,
+                imagePath: 'assets/images/icon-insegura.png',
               ),
             ],
           ),

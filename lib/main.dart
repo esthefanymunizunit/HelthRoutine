@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:healthroutine/splash_screen.dart';
 import 'core/theme/app_theme.dart';
-import 'features/home/pages/home_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,7 +15,8 @@ class MyApp extends StatelessWidget {
       title: 'Health Routine',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const HomePage(),
+      // Aqui a mágica acontece: mudamos de MainPage() para SplashScreen()
+      home: const SplashScreen(),
     );
   }
 }

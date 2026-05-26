@@ -2,29 +2,39 @@
   "normalActivities": [
     {
       "title": "Caminhar com o cachorro",
-      "colorKey": "pink"
+      "colorKey": "pink",
+      "hasTimer": false
     },
     {
       "title": "Estudar",
-      "colorKey": "blue"
+      "colorKey": "blue",
+      "hasTimer": false
     },
     {
       "title": "Meditação Rápida",
-      "colorKey": "green"
+      "colorKey": "green",
+      "hasTimer": true,
+      "timerDurationMinutes": 10,
+      "isPomodoro": false
     }
   ],
   "lowEnergyActivities": [
     {
       "title": "Alongamento Curto",
-      "colorKey": "pink"
+      "colorKey": "pink",
+      "hasTimer": false
     },
     {
       "title": "Beber água",
-      "colorKey": "blue"
+      "colorKey": "blue",
+      "hasTimer": false
     },
     {
       "title": "Meditar",
-      "colorKey": "green"
+      "colorKey": "green",
+      "hasTimer": true,
+      "timerDurationMinutes": 15,
+      "isPomodoro": false
     }
   ],
   "suggestions": [

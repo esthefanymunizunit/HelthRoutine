@@ -14,6 +14,8 @@ class SuggestionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMeditation = title.toLowerCase().contains('medita');
+
     return Container(
       padding: const EdgeInsets.all(16),
       height: 120,
@@ -30,9 +32,20 @@ class SuggestionCard extends StatelessWidget {
             Text(subtitle, style: AppTextStyles.bodySmall),
           ],
           const Spacer(),
-          const Align(
+          Align(
             alignment: Alignment.bottomRight,
-            child: Icon(Icons.stars, color: AppColors.starYellow, size: 32),
+            child: isMeditation
+                ? Image.asset(
+                    'assets/images/icon-nuvem-feliz.png',
+                    width: 64,
+                    height: 64,
+                    fit: BoxFit.contain,
+                  )
+                : const Icon(
+                    Icons.stars,
+                    color: AppColors.starYellow,
+                    size: 32,
+                  ),
           ),
         ],
       ),
