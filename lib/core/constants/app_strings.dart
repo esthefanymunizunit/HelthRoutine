@@ -30,8 +30,11 @@ class AppStrings {
   static const String quantityBtn = 'Quantidade';
   static const String repeatLabel = 'Repetir em';
   static const String addTimerLabel = 'Adicionar Temporizador';
+  static const String createTaskDurationLabel = 'Duração';
   static const String notificationsLabel = 'Notificações';
   static const String btnAddTask = 'Adicionar Tarefa';
+
+  static String createTaskDurationValue(int minutes) => '$minutes min';
 
   // Reports
   static const String reportsTitle = 'Sua Jornada';
@@ -67,4 +70,19 @@ class AppStrings {
   static const String templateAddRoutineBtn = '+ Adicionar a minha Rotina';
   static const String templateTimeLabel = 'Horário : ';
   static const String templateNotificationsLabel = 'Notificações';
+
+  // Timer
+  static const String timerTitle = 'Timer';
+  static const String timerMethodPomodoro = 'Método Pomodoro';
+  static const String timerDemoTaskTitle = 'Estudar 2h';
+  static const String timerDemoEndTime = 'Término às  10:00h';
+  static const String timerPauseActive = 'Pausa Ativa !';
+  static const String timerStartSession = 'Começar sessão';
+  static const String timerPause = 'Pausar';
+  static const String timerResume = 'Retomar';
+  static const String timerFinish = 'Finalizar';
+  static const String timerSuccessKicker = 'Tarefa';
+  static const String timerSuccessTitle = 'Finalizada com Sucesso';
+
+  static String timerBreakLabel(int minutes) => 'Pausa de $minutes min';
 }

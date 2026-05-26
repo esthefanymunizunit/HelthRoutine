@@ -68,7 +68,7 @@ class CustomBottomNav extends StatelessWidget {
   static FloatingActionButton buildFAB(BuildContext context) {
     return FloatingActionButton(
       onPressed: () async {
-        final novaTarefa = await showModalBottomSheet<String>(
+        final novaTarefa = await showModalBottomSheet<Map<String, dynamic>>(
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
@@ -78,7 +78,8 @@ class CustomBottomNav extends StatelessWidget {
           ),
         );
 
-        if (novaTarefa != null && novaTarefa.isNotEmpty) {
+        final titulo = novaTarefa?['title'] as String?;
+        if (novaTarefa != null && titulo != null && titulo.isNotEmpty) {
           HomePage.novaTarefaNotifier.value = novaTarefa;
         }
       },

@@ -30,4 +30,10 @@ class AppTextStyles {
     fontWeight: FontWeight.normal,
     color: Colors.black54,
   );
+
+  static TextStyle displayHuge = GoogleFonts.konkhmerSleokchher(
+    fontSize: 56,
+    fontWeight: FontWeight.bold,
+    color: AppColors.black,
+  );
 }

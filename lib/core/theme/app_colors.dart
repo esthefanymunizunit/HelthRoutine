@@ -41,4 +41,11 @@ class AppColors {
 
   // --- Variações Extras ---
   static const Color blueVariant = Color(0xFF04ABF7); // Similar ao moodSensivel
+
+  // --- Tela do Timer ---
+  static const Color timerBackground = Color(0xFFEFEFEF);
+  static const Color timerTrack = Color(0xFFD8D3CB);
+  static const Color closeButtonBg = Color(0xFFD9D5CE);
+  static const Color buttonInactiveBg = Color(0xFFE5E0D8);
+  static const Color successGreenLight = Color(0xFFCFE5C8);
 }

@@ -6,19 +6,32 @@ import '../../../core/theme/app_text_styles.dart';
 class ActivityCard extends StatefulWidget {
   final Color color;
   final String title;
+  final bool isExternallyCompleted;
+  final VoidCallback? onCirclePressed;
+  final void Function(Map<String, dynamic> updatedTask)? onEdited;
 
-  const ActivityCard({super.key, required this.color, required this.title});
+  const ActivityCard({
+    super.key,
+    required this.color,
+    required this.title,
+    this.isExternallyCompleted = false,
+    this.onCirclePressed,
+    this.onEdited,
+  });
 
   @override
   State<ActivityCard> createState() => _ActivityCardState();
 }
 
 class _ActivityCardState extends State<ActivityCard> {
-  bool isCompleted = false;
+  bool isInternallyCompleted = false;
 
   @override
   Widget build(BuildContext context) {
     const Color completedColor = Color(0xFF53B4E0);
+
+    final bool isDisplayedCompleted =
+        widget.isExternallyCompleted || isInternallyCompleted;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -31,18 +44,22 @@ class _ActivityCardState extends State<ActivityCard> {
         children: [
           GestureDetector(
             onTap: () {
-              setState(() {
-                isCompleted = !isCompleted;
-              });
+              if (widget.onCirclePressed != null) {
+                widget.onCirclePressed!();
+              } else {
+                setState(() {
+                  isInternallyCompleted = !isInternallyCompleted;
+                });
+              }
             },
             child: Container(
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: isCompleted ? completedColor : AppColors.white,
+                color: isDisplayedCompleted ? completedColor : AppColors.white,
                 shape: BoxShape.circle,
               ),
-              child: isCompleted
+              child: isDisplayedCompleted
                   ? const Icon(Icons.check, color: AppColors.white, size: 20)
                   : null,
             ),
@@ -53,7 +70,7 @@ class _ActivityCardState extends State<ActivityCard> {
             child: Text(
               widget.title,
               style: AppTextStyles.bodyBold.copyWith(
-                decoration: isCompleted
+                decoration: isDisplayedCompleted
                     ? TextDecoration.lineThrough
                     : TextDecoration.none,
                 decorationColor: completedColor,
@@ -63,8 +80,9 @@ class _ActivityCardState extends State<ActivityCard> {
           ),
 
           GestureDetector(
-            onTap: () {
-              showModalBottomSheet(
+            onTap: () async {
+              final updatedTask =
+                  await showModalBottomSheet<Map<String, dynamic>>(
                 context: context,
                 isScrollControlled: true,
                 backgroundColor: Colors.transparent,
@@ -78,6 +96,9 @@ class _ActivityCardState extends State<ActivityCard> {
                   ),
                 ),
               );
+              if (updatedTask != null && widget.onEdited != null) {
+                widget.onEdited!(updatedTask);
+              }
             },
             child: const Icon(Icons.edit, color: AppColors.white, size: 20),
           ),
