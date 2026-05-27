@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:healthroutine/core/widgets/custom_bottom_nav.dart';
+import 'package:healthroutine/features/profile/pages/profile_page.dart';
 import '../../features/home/pages/home_page.dart';
 import '../../features/reports/pages/reports_page.dart';
 import '../features/feature-template/pages/templates_page.dart';
@@ -17,7 +18,7 @@ class _MainPageState extends State<MainPage> {
     const HomePage(),
     const TemplatesPage(), 
     const ReportsPage(),
-    const Center(child: Text('Perfil (Em breve)')),
+    const ProfilePage(),
   ];
 
   @override

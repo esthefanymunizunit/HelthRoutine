@@ -4,7 +4,6 @@ import 'package:healthroutine/features/profile/widgets/profile_card.dart';
 import 'package:healthroutine/features/profile/widgets/profile_row.dart';
 import 'package:healthroutine/features/profile/widgets/profile_title.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/custom_bottom_nav.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -18,12 +17,7 @@ class _ProfilePageState extends State<ProfilePage>{
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      floatingActionButton: CustomBottomNav.buildFAB(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: const CustomBottomNav(),
-      
-      body: Container(
+    return Container(
         width: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -109,11 +103,10 @@ class _ProfilePageState extends State<ProfilePage>{
                 ),
               ),
               
-              const SizedBox(height: 100), // Espaço para não cobrir o FAB
+              const SizedBox(height: 120), // Espaço para não cobrir o FAB
             ],
           ),
         ),
-      ),
-    );
+      );
   }
 }
