@@ -7,6 +7,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_background.dart';
 
+import '../../calendar/pages/mood_calendar_page.dart';
 import '../../timer/pages/timer_page.dart';
 import '../widgets/mood_icon.dart';
 import '../widgets/activity_card.dart';
@@ -110,6 +111,12 @@ class _HomePageState extends State<HomePage> {
     if (completedViaTimer == true) {
       setState(() => _activitiesCompletedViaTimer.add(activityTitle));
     }
+  }
+
+  void _openMoodCalendarPage() {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const MoodCalendarPage()),
+    );
   }
 
   Future<void> _loadMockData() async {
@@ -326,45 +333,49 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildCheckInCard() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(24),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(AppStrings.checkInTitle, style: AppTextStyles.heading2),
-          const SizedBox(height: 4),
-          Text(AppStrings.checkInSubtitle, style: AppTextStyles.bodySmall),
-          const SizedBox(height: 20),
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              MoodIcon(
-                color: AppColors.moodAnimada,
-                label: 'Animada',
-                imagePath: 'assets/images/icon-animada.png',
-              ),
-              MoodIcon(
-                color: AppColors.moodSensivel,
-                label: 'Sensível',
-                imagePath: 'assets/images/icon-sensivel.png',
-              ),
-              MoodIcon(
-                color: AppColors.moodBrava,
-                label: 'Brava',
-                imagePath: 'assets/images/icon-brava.png',
-              ),
-              MoodIcon(
-                color: AppColors.moodInsegura,
-                label: 'Insegura',
-                imagePath: 'assets/images/icon-insegura.png',
-              ),
-            ],
-          ),
-        ],
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: _openMoodCalendarPage,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(AppStrings.checkInTitle, style: AppTextStyles.heading2),
+            const SizedBox(height: 4),
+            Text(AppStrings.checkInSubtitle, style: AppTextStyles.bodySmall),
+            const SizedBox(height: 20),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                MoodIcon(
+                  color: AppColors.moodAnimada,
+                  label: 'Animada',
+                  imagePath: 'assets/images/icon-animada.png',
+                ),
+                MoodIcon(
+                  color: AppColors.moodSensivel,
+                  label: 'Sensível',
+                  imagePath: 'assets/images/icon-sensivel.png',
+                ),
+                MoodIcon(
+                  color: AppColors.moodBrava,
+                  label: 'Brava',
+                  imagePath: 'assets/images/icon-brava.png',
+                ),
+                MoodIcon(
+                  color: AppColors.moodInsegura,
+                  label: 'Insegura',
+                  imagePath: 'assets/images/icon-insegura.png',
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
