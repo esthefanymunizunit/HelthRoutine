@@ -85,4 +85,22 @@ class AppStrings {
   static const String timerSuccessTitle = 'Finalizada com Sucesso';
 
   static String timerBreakLabel(int minutes) => 'Pausa de $minutes min';
+
+  // Mood Calendar
+  static const String moodTitleLeading = 'Mood';
+  static const String moodTitleHighlighted = 'Calendar';
+  static const String moodDateMock = 'Ma 26';
+  static const List<String> weekdaysShort = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
+  static const String moodMonthTitle = 'Mood do mês';
+  static const String moodMonthStatus = 'Animada';
+  static const String moodMonthDescription = 'Você está calma e otimista. Continue\ncom essa energia boa!';
+  
+  static const String statStepsValueMock = '101,65';
+  static const String statStepsSubtitle = 'Passos';
+  static const String statMeditationTitle = 'Meditação';
+  static const String statMeditationValueMock = '25/30';
+  static const String statMeditationSubtitle = 'Sessões';
+  static const String statDisciplineTitle = 'Disciplina';
+  static const String statDisciplineValueMock = '89%';
+  static const String statDisciplineSubtitle = 'Foco';
 }

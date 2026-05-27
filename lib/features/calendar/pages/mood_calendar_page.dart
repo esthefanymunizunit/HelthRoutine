@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
+import '../../../core/constants/app_strings.dart';
 
 class MoodCalendarPage extends StatelessWidget {
   const MoodCalendarPage({super.key});
@@ -15,28 +16,26 @@ class MoodCalendarPage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(
-                height: 56,
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: GestureDetector(
-                        onTap: () => Navigator.of(context).maybePop(),
-                        child: const Icon(Icons.arrow_back_ios_new, size: 18),
-                      ),
-                    ),
-                    Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).maybePop(),
+                    child: const Icon(Icons.arrow_back_ios_new, size: 18),
+                  ),
+                  Expanded(
+                    child: Column(
+                      mainAxisSize:
+                          MainAxisSize.min, // Ocupa apenas o necessário
                       children: [
-                        _HighlightedTitle(
-                          leading: 'Mood',
-                          highlighted: 'Calendar',
+                        const _HighlightedTitle(
+                          leading: AppStrings.moodTitleLeading,
+                          highlighted: AppStrings.moodTitleHighlighted,
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          'Ma 26',
+                          AppStrings.moodDateMock,
                           style: AppTextStyles.bodySmall.copyWith(
                             color: Colors.black45,
                             fontSize: 12,
@@ -44,14 +43,11 @@ class MoodCalendarPage extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const Align(
-                      alignment: Alignment.centerRight,
-                      child: Icon(Icons.calendar_today_outlined, size: 18),
-                    ),
-                  ],
-                ),
+                  ),
+                  const Icon(Icons.calendar_today_outlined, size: 18),
+                ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
 
               const _WeekdayRow(),
               const SizedBox(height: 10),
@@ -87,7 +83,7 @@ class _HighlightedTitle extends StatelessWidget {
       text: TextSpan(
         style: baseStyle,
         children: [
-          TextSpan(text: leading + ' '),
+          TextSpan(text: '$leading '),
           WidgetSpan(
             alignment: PlaceholderAlignment.middle,
             child: Container(
@@ -108,12 +104,10 @@ class _HighlightedTitle extends StatelessWidget {
 class _WeekdayRow extends StatelessWidget {
   const _WeekdayRow();
 
-  static const List<String> _labels = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
-
   @override
   Widget build(BuildContext context) {
     return Row(
-      children: _labels
+      children: AppStrings.weekdaysShort
           .map(
             (label) => Expanded(
               child: Center(
@@ -199,6 +193,22 @@ class _MoodDayCell extends StatelessWidget {
 
   const _MoodDayCell({required this.mood});
 
+  // Função para retornar o caminho correto da imagem baseada no humor
+  String _getIconPath(_MoodType type) {
+    switch (type) {
+      case _MoodType.happy:
+        return 'assets/images/icon-animada.png';
+      case _MoodType.calm:
+        return 'assets/images/icon-sensivel.png';
+      case _MoodType.angry:
+        return 'assets/images/icon-brava.png';
+      case _MoodType.anxious:
+        return 'assets/images/icon-insegura.png';
+      case _MoodType.alert:
+        return 'assets/images/icon-alerta.png'; // Verifique se este nome está correto no seu projeto
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final Color fillColor = _MoodPalette.colorFor(mood);
@@ -210,9 +220,14 @@ class _MoodDayCell extends StatelessWidget {
       ),
       child: mood == null
           ? null
-          : CustomPaint(
-              painter: _MoodFacePainter(type: mood!),
-              child: const SizedBox.expand(),
+          // O Padding garante que a imagem tenha uma margem de respiro e não toque as bordas do quadrado
+          : Padding(
+              padding: const EdgeInsets.all(6.0),
+              child: Image.asset(
+                _getIconPath(mood!),
+                fit: BoxFit
+                    .contain, // Mantém a proporção da imagem sem distorcer
+              ),
             ),
     );
   }
@@ -239,164 +254,6 @@ class _MoodPalette {
   }
 }
 
-class _MoodFacePainter extends CustomPainter {
-  final _MoodType type;
-
-  _MoodFacePainter({required this.type});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0
-      ..strokeCap = StrokeCap.round;
-
-    switch (type) {
-      case _MoodType.happy:
-        _drawClosedEyes(canvas, size, paint, mouthSmile: true);
-        break;
-      case _MoodType.calm:
-        _drawClosedEyes(
-          canvas,
-          size,
-          paint,
-          mouthSmile: true,
-          mouthSmall: true,
-        );
-        break;
-      case _MoodType.angry:
-        _drawAngryFace(canvas, size, paint);
-        break;
-      case _MoodType.anxious:
-        _drawAnxiousFace(canvas, size, paint);
-        break;
-      case _MoodType.alert:
-        _drawAlertFace(canvas, size, paint);
-        break;
-    }
-  }
-
-  void _drawClosedEyes(
-    Canvas canvas,
-    Size size,
-    Paint paint, {
-    required bool mouthSmile,
-    bool mouthSmall = false,
-  }) {
-    final double eyeY = size.height * 0.42;
-    final double eyeWidth = size.width * 0.18;
-    final double eyeSpacing = size.width * 0.22;
-    final Offset leftStart = Offset(size.width * 0.25, eyeY);
-    final Offset rightStart = Offset(size.width * 0.25 + eyeSpacing, eyeY);
-
-    canvas.drawLine(leftStart, leftStart.translate(eyeWidth, 0), paint);
-    canvas.drawLine(rightStart, rightStart.translate(eyeWidth, 0), paint);
-
-    final Rect mouthRect = Rect.fromCenter(
-      center: Offset(size.width * 0.5, size.height * 0.66),
-      width: size.width * (mouthSmall ? 0.28 : 0.4),
-      height: size.height * (mouthSmall ? 0.16 : 0.25),
-    );
-    canvas.drawArc(
-      mouthRect,
-      mouthSmile ? 0.1 : 3.2,
-      mouthSmile ? 3.0 : 3.0,
-      false,
-      paint,
-    );
-  }
-
-  void _drawAngryFace(Canvas canvas, Size size, Paint paint) {
-    final double eyeY = size.height * 0.35;
-    canvas.drawLine(
-      Offset(size.width * 0.25, eyeY),
-      Offset(size.width * 0.4, eyeY + 4),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(size.width * 0.6, eyeY + 4),
-      Offset(size.width * 0.75, eyeY),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(size.width * 0.3, size.height * 0.45),
-      Offset(size.width * 0.4, size.height * 0.45),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(size.width * 0.6, size.height * 0.45),
-      Offset(size.width * 0.7, size.height * 0.45),
-      paint,
-    );
-    canvas.drawLine(
-      Offset(size.width * 0.35, size.height * 0.68),
-      Offset(size.width * 0.65, size.height * 0.68),
-      paint,
-    );
-  }
-
-  void _drawAnxiousFace(Canvas canvas, Size size, Paint paint) {
-    final Paint fillBlack = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.fill;
-    final Paint fillWhite = Paint()
-      ..color = Colors.white
-      ..style = PaintingStyle.fill;
-
-    final Offset leftEyeCenter = Offset(size.width * 0.36, size.height * 0.5);
-    canvas.drawCircle(leftEyeCenter, size.width * 0.16, fillWhite);
-    canvas.drawCircle(leftEyeCenter, size.width * 0.07, fillBlack);
-
-    canvas.drawCircle(
-      Offset(size.width * 0.66, size.height * 0.5),
-      size.width * 0.05,
-      fillBlack,
-    );
-  }
-
-  void _drawAlertFace(Canvas canvas, Size size, Paint paint) {
-    final Paint triangleFill = Paint()
-      ..color = AppColors.softYellow
-      ..style = PaintingStyle.fill;
-    final Paint triangleStroke = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
-
-    final Path triangle = Path()
-      ..moveTo(size.width * 0.5, size.height * 0.25)
-      ..lineTo(size.width * 0.2, size.height * 0.75)
-      ..lineTo(size.width * 0.8, size.height * 0.75)
-      ..close();
-
-    canvas.drawPath(triangle, triangleFill);
-    canvas.drawPath(triangle, triangleStroke);
-
-    final Paint exclamation = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.fill;
-    canvas.drawRect(
-      Rect.fromCenter(
-        center: Offset(size.width * 0.5, size.height * 0.52),
-        width: size.width * 0.05,
-        height: size.height * 0.18,
-      ),
-      exclamation,
-    );
-    canvas.drawCircle(
-      Offset(size.width * 0.5, size.height * 0.68),
-      size.width * 0.03,
-      exclamation,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _MoodFacePainter oldDelegate) {
-    return oldDelegate.type != type;
-  }
-}
-
 class _MonthMoodCard extends StatelessWidget {
   const _MonthMoodCard();
 
@@ -412,10 +269,11 @@ class _MonthMoodCard extends StatelessWidget {
         children: [
           Expanded(
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Mood do mes',
+                  AppStrings.moodMonthTitle,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: Colors.black,
                     fontWeight: FontWeight.w600,
@@ -424,12 +282,12 @@ class _MonthMoodCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'Animada',
+                  AppStrings.moodMonthStatus,
                   style: AppTextStyles.heading1.copyWith(fontSize: 24),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  'voce esta calma e otimista. Continue\ncom essa energia boa!',
+                  AppStrings.moodMonthDescription,
                   style: AppTextStyles.bodySmall.copyWith(
                     color: Colors.black87,
                     fontSize: 11,
@@ -440,10 +298,14 @@ class _MonthMoodCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
+          // Imagem grande no card de resumo substituindo o antigo CustomPainter
           SizedBox(
             width: 80,
             height: 80,
-            child: CustomPaint(painter: _LargeSmilePainter()),
+            child: Image.asset(
+              'assets/images/icon-animada.png',
+              fit: BoxFit.contain,
+            ),
           ),
         ],
       ),
@@ -451,70 +313,28 @@ class _MonthMoodCard extends StatelessWidget {
   }
 }
 
-class _LargeSmilePainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final Paint paint = Paint()
-      ..color = Colors.black
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = 4.0
-      ..strokeCap = StrokeCap.round;
-
-    canvas.drawArc(
-      Rect.fromCenter(
-        center: Offset(size.width * 0.5, size.height * 0.45),
-        width: size.width * 0.35,
-        height: size.height * 0.25,
-      ),
-      0.2,
-      2.6,
-      false,
-      paint,
-    );
-
-    canvas.drawArc(
-      Rect.fromCenter(
-        center: Offset(size.width * 0.72, size.height * 0.45),
-        width: size.width * 0.35,
-        height: size.height * 0.25,
-      ),
-      0.2,
-      2.6,
-      false,
-      paint,
-    );
-
-    canvas.drawArc(
-      Rect.fromCenter(
-        center: Offset(size.width * 0.55, size.height * 0.7),
-        width: size.width * 0.7,
-        height: size.height * 0.45,
-      ),
-      0.1,
-      3.0,
-      false,
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _LargeSmilePainter oldDelegate) => false;
-}
-
 class _StatsRow extends StatelessWidget {
   const _StatsRow();
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: const [
+    return const Row(
+      children: [
         _StatItem(
-          title: 'Atividade Fisica',
-          value: '101,65',
-          subtitle: 'Passos',
+          title: AppStrings.physicalActivity,
+          value: AppStrings.statStepsValueMock,
+          subtitle: AppStrings.statStepsSubtitle,
         ),
-        _StatItem(title: 'Meditacao', value: '25/30', subtitle: 'Sessoes'),
-        _StatItem(title: 'Disciplina', value: '89%', subtitle: 'Foco'),
+        _StatItem(
+          title: AppStrings.statMeditationTitle,
+          value: AppStrings.statMeditationValueMock,
+          subtitle: AppStrings.statMeditationSubtitle,
+        ),
+        _StatItem(
+          title: AppStrings.statDisciplineTitle,
+          value: AppStrings.statDisciplineValueMock,
+          subtitle: AppStrings.statDisciplineSubtitle,
+        ),
       ],
     );
   }
@@ -535,6 +355,7 @@ class _StatItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Expanded(
       child: Column(
+        mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
