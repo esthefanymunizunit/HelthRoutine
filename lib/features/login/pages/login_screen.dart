@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:healthroutine/core/main_page.dart';
 import 'package:healthroutine/features/login/widgets/auth_toggle_switch.dart';
 import 'package:healthroutine/features/login/widgets/custom_text_field.dart';
 import 'package:healthroutine/features/login/widgets/primary_button.dart';
@@ -110,7 +111,10 @@ class _LoginScreenState extends State<LoginScreen> {
                             PrimaryButton(
                               text: isLogin ? 'Log in' : 'Sign in', 
                               onPressed: (){
-
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(builder: (context) => const MainPage()),
+                                );
                               },
                               ),
                             const SizedBox(height: 25),
