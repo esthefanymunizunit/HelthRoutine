@@ -8,6 +8,8 @@ class AppColors {
     0xFFF7F2EF,
   ); // Fundo do modal "Nova Tarefa"
 
+  static const Color borderBlue = Color(0xFF53B4E0);
+
   // --- Moods (Check-in Diário) ---
   static const Color moodAnimada = Color(0xFFF9ABD3);
   static const Color moodSensivel = Color(0xFF02ADFD);

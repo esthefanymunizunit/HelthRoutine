@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:healthroutine/core/main_page.dart';
+import 'package:healthroutine/features/login/pages/login_screen.dart';
 import 'package:healthroutine/core/widgets/app_background.dart';
 import 'package:lottie/lottie.dart';
 
@@ -63,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen>
                   if (status == AnimationStatus.completed) {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const MainPage()),
+                      MaterialPageRoute(builder: (context) => const LoginScreen()),
                     );
                   }
                 });
