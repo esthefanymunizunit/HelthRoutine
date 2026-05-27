@@ -22,7 +22,6 @@ class ProfileAvatar extends StatelessWidget {
             child: ClipOval(
               child: SvgPicture.asset(
                 'assets/icons/user.svg',
-                fit: BoxFit.cover,
                 width: 140,
                 height: 140,
               ),

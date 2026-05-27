@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:healthroutine/features/login/pages/login_screen.dart';
 import 'package:healthroutine/features/profile/widgets/profile_avatar.dart';
 import 'package:healthroutine/features/profile/widgets/profile_card.dart';
 import 'package:healthroutine/features/profile/widgets/profile_row.dart';
@@ -94,7 +95,11 @@ class _ProfilePageState extends State<ProfilePage>{
                 width: 238,
                 height: 35,
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(context, 
+                    MaterialPageRoute(builder: (context) => const LoginScreen()),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.borderBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),

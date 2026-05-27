@@ -33,14 +33,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   child: Column(
                     children: [
                       // 2. Área do Logo (Parte Superior)
-                      Expanded(
-                        child: SafeArea(
-                          child: Center(
-                            child: Row(
+                      SafeArea(
+                        child: Column(
+                          children: [
+                            const SizedBox(height: 60),
+                            Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 SvgPicture.asset(
-                                  'assets/icons/Logo.svg', 
+                                  'assets/icons/Logo.svg',
                                   width: 92,
                                   height: 86,
                                 ),
@@ -61,18 +62,23 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                               ],
                             ),
-                          ),
+                            const SizedBox(height: 60),
+                          ],
                         ),
                       ),
 
                       // 3. Card Branco Inferior
-                      Container(
-                        height: MediaQuery.of(context).size.height * 0.65,
-                        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
+                      Expanded(
+                        child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 30,
+                          vertical: 25,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.white,
                           borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(50), 
+                            top: Radius.circular(50),
                           ),
                           boxShadow: [
                             BoxShadow(
@@ -85,38 +91,45 @@ class _LoginScreenState extends State<LoginScreen> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-
                             AuthToggleSwitch(
-                              isLogin: isLogin, 
-                              onChanged: (bool value) => setState(() => isLogin = value)),
-
+                              isLogin: isLogin,
+                              onChanged: (bool value) =>
+                                  setState(() => isLogin = value),
+                            ),
                             const SizedBox(height: 40),
 
                             // --- Campo: Usuário ou Email ---
                             const CustomTextField(hintText: 'Usuário ou Email'),
-
                             const SizedBox(height: 20),
 
                             // --- Campo: Senha ---
-                            const CustomTextField(hintText: 'Senha', obscureText: true),
-                            
-                            if(!isLogin) ...[
+                            const CustomTextField(
+                              hintText: 'Senha',
+                              obscureText: true,
+                            ),
+
+                            if (!isLogin) ...[
                               const SizedBox(height: 20),
-                              const CustomTextField(hintText: 'Confirmar senha', obscureText: true),
+                              const CustomTextField(
+                                hintText: 'Confirmar senha',
+                                obscureText: true,
+                              ),
                             ],
 
                             const SizedBox(height: 30),
 
                             // --- Botão Principal ---
                             PrimaryButton(
-                              text: isLogin ? 'Log in' : 'Sign in', 
-                              onPressed: (){
+                              text: isLogin ? 'Log in' : 'Sign in',
+                              onPressed: () {
                                 Navigator.pushReplacement(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const MainPage()),
+                                  MaterialPageRoute(
+                                    builder: (context) => const MainPage(),
+                                  ),
                                 );
                               },
-                              ),
+                            ),
                             const SizedBox(height: 25),
 
                             // --- Divisor "ou" ---
@@ -134,12 +147,11 @@ class _LoginScreenState extends State<LoginScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 SvgPicture.asset(
-                                    'assets/icons/facebook.svg', 
-                                    width: 29, 
-                                    height: 29),
-                                
+                                  'assets/icons/facebook.svg',
+                                  width: 29,
+                                  height: 29,
+                                ),
                                 const SizedBox(width: 20),
-                                
                                 SvgPicture.asset(
                                   'assets/icons/google.svg',
                                   width: 32,
@@ -151,6 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ],
                         ),
                       ),
+                      )
                     ],
                   ),
                 ),
