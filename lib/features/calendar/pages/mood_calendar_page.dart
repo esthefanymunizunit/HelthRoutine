@@ -27,7 +27,7 @@ class MoodCalendarPage extends StatelessWidget {
                   Expanded(
                     child: Column(
                       mainAxisSize:
-                          MainAxisSize.min, // Ocupa apenas o necessário
+                          MainAxisSize.min, 
                       children: [
                         const _HighlightedTitle(
                           leading: AppStrings.moodTitleLeading,
@@ -205,7 +205,7 @@ class _MoodDayCell extends StatelessWidget {
       case _MoodType.anxious:
         return 'assets/images/icon-insegura.png';
       case _MoodType.alert:
-        return 'assets/images/icon-alerta.png'; // Verifique se este nome está correto no seu projeto
+        return 'assets/images/icon-alerta.png'; 
     }
   }
 
@@ -220,13 +220,12 @@ class _MoodDayCell extends StatelessWidget {
       ),
       child: mood == null
           ? null
-          // O Padding garante que a imagem tenha uma margem de respiro e não toque as bordas do quadrado
           : Padding(
               padding: const EdgeInsets.all(6.0),
               child: Image.asset(
                 _getIconPath(mood!),
                 fit: BoxFit
-                    .contain, // Mantém a proporção da imagem sem distorcer
+                    .contain, 
               ),
             ),
     );
@@ -298,7 +297,6 @@ class _MonthMoodCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 12),
-          // Imagem grande no card de resumo substituindo o antigo CustomPainter
           SizedBox(
             width: 80,
             height: 80,
