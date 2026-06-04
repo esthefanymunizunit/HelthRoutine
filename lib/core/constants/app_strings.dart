@@ -103,4 +103,20 @@ class AppStrings {
   static const String statDisciplineTitle = 'Disciplina';
   static const String statDisciplineValueMock = '89%';
   static const String statDisciplineSubtitle = 'Foco';
+
+  // Auth
+  static const String authAllowedDomainSuffix = '@souunit.com.br';
+  static const String authErrorInvalidDomain =
+      'Acesso permitido apenas para contas @souunit.com.br';
+  static const String authErrorInvalidCredentials = 'Email ou senha inválidos';
+  static const String authErrorUserExists =
+      'Já existe uma conta cadastrada com esse email';
+  static const String authErrorWeakPassword =
+      'Senha muito fraca (mínimo 6 caracteres)';
+  static const String authErrorInvalidEmail = 'Email inválido';
+  static const String authErrorPasswordMismatch = 'As senhas não conferem';
+  static const String authErrorEmptyFields =
+      'Preencha email e senha para continuar';
+  static const String authErrorGoogleSignInAborted = 'Login com Google cancelado';
+  static const String authErrorGeneric = 'Erro inesperado. Tente novamente.';
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:healthroutine/features/login/pages/login_screen.dart';
 import 'package:healthroutine/core/widgets/app_background.dart';
+import 'package:healthroutine/core/widgets/auth_gate.dart';
 import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -63,7 +63,7 @@ class _SplashScreenState extends State<SplashScreen>
                   if (status == AnimationStatus.completed) {
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(builder: (context) => const LoginScreen()),
+                      MaterialPageRoute(builder: (context) => AuthGate()),
                     );
                   }
                 });
