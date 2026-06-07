@@ -8,6 +8,10 @@ import '../features/feature-template/pages/templates_page.dart';
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
 
+  /// Permite que outras telas peçam pra trocar de aba.
+  /// Ex.: depois de adicionar uma rotina, pular pra Home (índice 0).
+  static final ValueNotifier<int> tabNotifier = ValueNotifier(0);
+
   @override
   State<MainPage> createState() => _MainPageState();
 }
@@ -16,10 +20,27 @@ class _MainPageState extends State<MainPage> {
   int _currentIndex = 0;
   final List<Widget> _pages = [
     const HomePage(),
-    const TemplatesPage(), 
+    const TemplatesPage(),
     const ReportsPage(),
     const ProfilePage(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    MainPage.tabNotifier.addListener(_trocarAba);
+  }
+
+  @override
+  void dispose() {
+    MainPage.tabNotifier.removeListener(_trocarAba);
+    super.dispose();
+  }
+
+  void _trocarAba() {
+    if (!mounted) return;
+    setState(() => _currentIndex = MainPage.tabNotifier.value);
+  }
 
   @override
   Widget build(BuildContext context) {

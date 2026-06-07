@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_background.dart';
+import 'package:healthroutine/features/feature-template/services/rotina_service.dart';
 
 import '../../calendar/pages/mood_calendar_page.dart';
 import '../../timer/pages/timer_page.dart';
@@ -16,14 +18,14 @@ import '../widgets/low_energy_dialog.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
-  static final ValueNotifier<Map<String, dynamic>?> novaTarefaNotifier =
-      ValueNotifier(null);
 
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  final RotinaService _rotinaService = RotinaService();
+
   bool isLowEnergyMode = false;
 
   Map<String, dynamic>? mockData;
@@ -35,103 +37,26 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _loadMockData();
-    HomePage.novaTarefaNotifier.addListener(_onNovaTarefaAdicionada);
-  }
-
-  @override
-  void dispose() {
-    HomePage.novaTarefaNotifier.removeListener(_onNovaTarefaAdicionada);
-    super.dispose();
-  }
-
-  void _onNovaTarefaAdicionada() {
-    final novaTarefa = HomePage.novaTarefaNotifier.value;
-    if (novaTarefa == null || mockData == null || isLowEnergyMode) return;
-
-    final bool tarefaTemTimer = novaTarefa['hasTimer'] == true;
-    final novaAtividade = <String, dynamic>{
-      'title': novaTarefa['title'],
-      'colorKey': 'blue',
-      'hasTimer': tarefaTemTimer,
-      if (tarefaTemTimer)
-        'timerDurationMinutes': novaTarefa['timerDurationMinutes'],
-      if (tarefaTemTimer) 'isPomodoro': novaTarefa['isPomodoro'] == true,
-    };
-
-    setState(() {
-      mockData!['normalActivities'].insert(0, novaAtividade);
-    });
-    HomePage.novaTarefaNotifier.value = null;
-  }
-
-  void _handleActivityEdited(
-    Map<String, dynamic> activity,
-    Map<String, dynamic> updatedTask,
-  ) {
-    final String oldTitle = activity['title'] as String;
-    final bool tarefaTemTimer = updatedTask['hasTimer'] == true;
-    final String newTitle = updatedTask['title'] as String;
-
-    setState(() {
-      activity['title'] = newTitle;
-      activity['hasTimer'] = tarefaTemTimer;
-      if (tarefaTemTimer) {
-        activity['timerDurationMinutes'] =
-            updatedTask['timerDurationMinutes'];
-        activity['isPomodoro'] = updatedTask['isPomodoro'] == true;
-      } else {
-        activity.remove('timerDurationMinutes');
-        activity.remove('isPomodoro');
-      }
-      _activitiesCompletedViaTimer.remove(oldTitle);
-    });
-  }
-
-  Future<void> _handleActivityCirclePressed(
-    Map<String, dynamic> activity,
-  ) async {
-    final String activityTitle = activity['title'] as String;
-
-    if (_activitiesCompletedViaTimer.contains(activityTitle)) {
-      setState(() => _activitiesCompletedViaTimer.remove(activityTitle));
-      return;
-    }
-
-    final completedViaTimer = await Navigator.of(context).push<bool>(
-      MaterialPageRoute(
-        builder: (_) => TimerPage(
-          taskTitle: activityTitle,
-          workDurationMinutes: activity['timerDurationMinutes'] as int?,
-          isPomodoro: activity['isPomodoro'] == true,
-        ),
-      ),
+    _rotinaService.seedPadraoSeVazio().catchError(
+      (e) => debugPrint('Erro ao semear rotina: $e'),
     );
-
-    if (!mounted) return;
-    if (completedViaTimer == true) {
-      setState(() => _activitiesCompletedViaTimer.add(activityTitle));
-    }
-  }
-
-  void _openMoodCalendarPage() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => const MoodCalendarPage()),
+    _rotinaService.limparExpiradas().catchError(
+      (e) => debugPrint('Erro ao limpar expiradas: $e'),
     );
   }
 
-  Future<void> _loadMockData() async {
-    try {
-      final String response = await rootBundle.loadString(
-        'assets/mocks/home_mock.json',
-      );
-      final data = await json.decode(response);
-      setState(() {
-        mockData = data;
-        isLoading = false;
-      });
-    } catch (e) {
-      debugPrint("Erro ao carregar o mock: $e");
-    }
+  String get _saudacao {
+    final user = FirebaseAuth.instance.currentUser;
+    final base = user?.displayName ?? user?.email ?? '';
+    if (base.isEmpty) return 'Olá!';
+    final primeiro = base.split('@').first.split(' ').first;
+    return 'Olá, $primeiro !';
+  }
+
+  Color _hexToColor(String hex) {
+    var h = hex.replaceFirst('#', '');
+    if (h.length == 6) h = 'FF$h';
+    return Color(int.parse(h, radix: 16));
   }
 
   Color _getColor(String colorKey) {
@@ -145,6 +70,103 @@ class _HomePageState extends State<HomePage> {
       default:
         return AppColors.white;
     }
+  }
+
+  Future<void> _loadMockData() async {
+    try {
+      final String response = await rootBundle.loadString(
+        'assets/mocks/home_mock.json',
+      );
+      final data = await json.decode(response);
+      if (!mounted) return;
+      setState(() {
+        mockData = data;
+        isLoading = false;
+      });
+    } catch (e) {
+      debugPrint("Erro ao carregar o mock: $e");
+    }
+  }
+
+  Future<void> _onCircle(Atividade a) async {
+    if (a.hasTimer) {
+      final completou = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => TimerPage(
+            taskTitle: a.title,
+            workDurationMinutes: a.timerDurationMinutes,
+            isPomodoro: a.isPomodoro,
+          ),
+        ),
+      );
+      if (completou == true) {
+        await _rotinaService.definirConcluida(a.id, true);
+      }
+    } else {
+      await _rotinaService.definirConcluida(a.id, !a.concluida);
+    }
+  }
+
+  Future<void> _onEdited(Atividade a, Map<String, dynamic> updatedTask) async {
+    final bool temTimer = updatedTask['hasTimer'] == true;
+    await _rotinaService.atualizar(a.id, {
+      'title': updatedTask['title'],
+      'hasTimer': temTimer,
+      'timerDurationMinutes': temTimer
+          ? updatedTask['timerDurationMinutes']
+          : null,
+      'isPomodoro': temTimer ? (updatedTask['isPomodoro'] == true) : false,
+    });
+  }
+
+  Future<void> _confirmarRemover(Atividade a) async {
+    final bool? ok = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Remover atividade'),
+        content: Text('Apagar "${a.title}" da sua rotina?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Cancelar'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Apagar'),
+          ),
+        ],
+      ),
+    );
+    if (ok == true) {
+      await _rotinaService.remover(a.id);
+    }
+  }
+
+  Future<void> _handleLowEnergyCircle(Map<String, dynamic> activity) async {
+    final String title = activity['title'] as String;
+    if (_activitiesCompletedViaTimer.contains(title)) {
+      setState(() => _activitiesCompletedViaTimer.remove(title));
+      return;
+    }
+    final completed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => TimerPage(
+          taskTitle: title,
+          workDurationMinutes: activity['timerDurationMinutes'] as int?,
+          isPomodoro: activity['isPomodoro'] == true,
+        ),
+      ),
+    );
+    if (!mounted) return;
+    if (completed == true) {
+      setState(() => _activitiesCompletedViaTimer.add(title));
+    }
+  }
+
+  void _openMoodCalendarPage() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const MoodCalendarPage()));
   }
 
   void _toggleLowEnergyMode() async {
@@ -171,10 +193,6 @@ class _HomePageState extends State<HomePage> {
       );
     }
 
-    final List<dynamic> currentActivities = isLowEnergyMode
-        ? mockData!['lowEnergyActivities']
-        : mockData!['normalActivities'];
-
     final List<dynamic> currentSuggestions = mockData!['suggestions'];
 
     return Scaffold(
@@ -190,10 +208,7 @@ class _HomePageState extends State<HomePage> {
                   children: [
                     Row(
                       children: [
-                        Text(
-                          AppStrings.greeting,
-                          style: AppTextStyles.heading1,
-                        ),
+                        Text(_saudacao, style: AppTextStyles.heading1),
                         const SizedBox(width: 8),
                         Image.asset(
                           'assets/images/estrela1.png',
@@ -213,10 +228,8 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 24),
-
                 isLowEnergyMode ? _buildLowEnergyBanner() : _buildCheckInCard(),
                 const SizedBox(height: 32),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -250,43 +263,10 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
-                Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.white,
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: Colors.grey.shade300),
-                  ),
-                  child: Column(
-                    children: currentActivities.map((activity) {
-                      final String activityTitle = activity['title'] as String;
-                      final bool activityHasTimer = activity['hasTimer'] == true;
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 12.0),
-                        child: ActivityCard(
-                          color: _getColor(activity['colorKey']),
-                          title: activityTitle,
-                          isExternallyCompleted:
-                              _activitiesCompletedViaTimer.contains(
-                            activityTitle,
-                          ),
-                          onCirclePressed: activityHasTimer
-                              ? () => _handleActivityCirclePressed(
-                                    activity as Map<String, dynamic>,
-                                  )
-                              : null,
-                          onEdited: (updatedTask) => _handleActivityEdited(
-                            activity as Map<String, dynamic>,
-                            updatedTask,
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ),
+                isLowEnergyMode
+                    ? _buildLowEnergyActivities()
+                    : _buildFirestoreActivities(),
                 const SizedBox(height: 32),
-
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -305,7 +285,6 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
                 Row(
                   children: currentSuggestions
                       .map(
@@ -328,6 +307,88 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildFirestoreActivities() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: StreamBuilder<List<Atividade>>(
+        stream: _rotinaService.ouvirAtividades(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            );
+          }
+          final itens = snapshot.data ?? [];
+          if (itens.isEmpty) {
+            return Padding(
+              padding: const EdgeInsets.all(16),
+              child: Text(
+                'Sem atividades ainda. Adicione um template em Templates.',
+                style: AppTextStyles.bodySmall.copyWith(color: Colors.black54),
+              ),
+            );
+          }
+          return Column(
+            children: itens.map((a) {
+              return Padding(
+                padding: const EdgeInsets.only(bottom: 12.0),
+                child: GestureDetector(
+                  onLongPress: () => _confirmarRemover(a),
+                  child: ActivityCard(
+                    key: ValueKey(a.id),
+                    color: _hexToColor(a.cor),
+                    title: a.title,
+                    isExternallyCompleted: a.concluida,
+                    onCirclePressed: () => _onCircle(a),
+                    onEdited: (updated) => _onEdited(a, updated),
+                  ),
+                ),
+              );
+            }).toList(),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildLowEnergyActivities() {
+    final List<dynamic> atividades = mockData!['lowEnergyActivities'];
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Column(
+        children: atividades.map((activity) {
+          final String title = activity['title'] as String;
+          final bool temTimer = activity['hasTimer'] == true;
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 12.0),
+            child: ActivityCard(
+              color: _getColor(activity['colorKey']),
+              title: title,
+              isExternallyCompleted: _activitiesCompletedViaTimer.contains(
+                title,
+              ),
+              onCirclePressed: temTimer
+                  ? () =>
+                        _handleLowEnergyCircle(activity as Map<String, dynamic>)
+                  : null,
+            ),
+          );
+        }).toList(),
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_strings.dart'; 
+import 'package:healthroutine/core/main_page.dart';
+import 'package:healthroutine/features/feature-template/services/rotina_service.dart';
+import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_background.dart';
 import '../widgets/template_task_card.dart';
@@ -21,6 +23,9 @@ class TemplateDetailsPage extends StatefulWidget {
 }
 
 class _TemplateDetailsPageState extends State<TemplateDetailsPage> {
+  final RotinaService _service = RotinaService();
+  bool _salvando = false;
+
   List<Map<String, dynamic>> _localTasks = [];
 
   @override
@@ -43,9 +48,7 @@ class _TemplateDetailsPageState extends State<TemplateDetailsPage> {
       builder: (context, child) {
         return Theme(
           data: ThemeData.light().copyWith(
-            colorScheme: ColorScheme.light(
-              primary: widget.color,
-            ),
+            colorScheme: ColorScheme.light(primary: widget.color),
           ),
           child: child!,
         );
@@ -56,6 +59,37 @@ class _TemplateDetailsPageState extends State<TemplateDetailsPage> {
       setState(() {
         _localTasks[index][timeKey] = picked.format(context);
       });
+    }
+  }
+
+  // Converte a Color do template num hex tipo "#FCAFE9" pra salvar no banco.
+  String get _corHex =>
+      '#${widget.color.value.toRadixString(16).padLeft(8, '0').substring(2).toUpperCase()}';
+
+  Future<void> _adicionarARotina() async {
+    if (_salvando) return;
+    setState(() => _salvando = true);
+    try {
+      // CREATE: soma as tarefas escolhidas na rotina, sem apagar as existentes.
+      await _service.adicionarVarias(
+        origem: widget.title,
+        cor: _corHex,
+        tarefas: _localTasks.map((t) => {'title': t['title']}).toList(),
+      );
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Adicionado à sua rotina!')));
+      // Volta pra árvore principal e pula pra aba Home (Atividades de Hoje).
+      Navigator.pop(context);
+      MainPage.tabNotifier.value = 0;
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Erro ao salvar: $e')));
+    } finally {
+      if (mounted) setState(() => _salvando = false);
     }
   }
 
@@ -75,7 +109,9 @@ class _TemplateDetailsPageState extends State<TemplateDetailsPage> {
                     Text(widget.title, style: AppTextStyles.heading1),
                     const CircleAvatar(
                       radius: 24,
-                      backgroundImage: AssetImage('assets/images/icon-perfil.png'),
+                      backgroundImage: AssetImage(
+                        'assets/images/icon-perfil.png',
+                      ),
                     ),
                   ],
                 ),
@@ -94,16 +130,19 @@ class _TemplateDetailsPageState extends State<TemplateDetailsPage> {
                   ),
                   child: Column(
                     children: [
-                      // Sub-header com botão de voltar
                       Row(
                         children: [
                           GestureDetector(
                             onTap: () => Navigator.pop(context),
-                            child: const Icon(Icons.arrow_back_ios, size: 20, color: Colors.black),
+                            child: const Icon(
+                              Icons.arrow_back_ios,
+                              size: 20,
+                              color: Colors.black,
+                            ),
                           ),
                           const SizedBox(width: 8),
                           Text(
-                            AppStrings.templatePersonalizeTitle, // MUDANÇA AQUI
+                            AppStrings.templatePersonalizeTitle,
                             style: AppTextStyles.heading2.copyWith(
                               fontSize: 16,
                               color: Colors.black,
@@ -113,7 +152,7 @@ class _TemplateDetailsPageState extends State<TemplateDetailsPage> {
                       ),
                       const SizedBox(height: 24),
 
-                      // LISTA DE TAREFAS
+                      // LISTA (edição local antes de adicionar)
                       Expanded(
                         child: ListView.builder(
                           itemCount: _localTasks.length,
@@ -122,9 +161,7 @@ class _TemplateDetailsPageState extends State<TemplateDetailsPage> {
                               task: _localTasks[index],
                               themeColor: widget.color,
                               onDelete: () {
-                                setState(() {
-                                  _localTasks.removeAt(index);
-                                });
+                                setState(() => _localTasks.removeAt(index));
                               },
                               onStartTapped: () => _pickTime(index, 'start'),
                               onEndTapped: () => _pickTime(index, 'end'),
@@ -141,13 +178,10 @@ class _TemplateDetailsPageState extends State<TemplateDetailsPage> {
 
                       const SizedBox(height: 16),
 
-                      // BOTÃO ADICIONAR
                       SizedBox(
                         width: double.infinity,
                         child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.pop(context);
-                          },
+                          onPressed: _salvando ? null : _adicionarARotina,
                           style: ElevatedButton.styleFrom(
                             backgroundColor: widget.color,
                             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -156,13 +190,22 @@ class _TemplateDetailsPageState extends State<TemplateDetailsPage> {
                             ),
                             elevation: 0,
                           ),
-                          child: Text(
-                            AppStrings.templateAddRoutineBtn, // MUDANÇA AQUI
-                            style: AppTextStyles.bodyBold.copyWith(
-                              color: Colors.black,
-                              fontSize: 14,
-                            ),
-                          ),
+                          child: _salvando
+                              ? const SizedBox(
+                                  height: 20,
+                                  width: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    color: Colors.black,
+                                  ),
+                                )
+                              : Text(
+                                  AppStrings.templateAddRoutineBtn,
+                                  style: AppTextStyles.bodyBold.copyWith(
+                                    color: Colors.black,
+                                    fontSize: 14,
+                                  ),
+                                ),
                         ),
                       ),
                     ],
