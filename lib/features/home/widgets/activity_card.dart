@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:healthroutine/features/tasks/pages/creeate_task_page.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-class ActivityCard extends StatefulWidget {
+class ActivityCard extends StatelessWidget {
   final Color color;
   final String title;
-  final bool isExternallyCompleted;
+  final bool isExternallyCompleted; 
   final VoidCallback? onCirclePressed;
-  final void Function(Map<String, dynamic> updatedTask)? onEdited;
+  final VoidCallback? onEdited;
 
   const ActivityCard({
     super.key,
@@ -20,46 +19,28 @@ class ActivityCard extends StatefulWidget {
   });
 
   @override
-  State<ActivityCard> createState() => _ActivityCardState();
-}
-
-class _ActivityCardState extends State<ActivityCard> {
-  bool isInternallyCompleted = false;
-
-  @override
   Widget build(BuildContext context) {
     const Color completedColor = Color(0xFF53B4E0);
-
-    final bool isDisplayedCompleted =
-        widget.isExternallyCompleted || isInternallyCompleted;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: widget.color,
+        color: color,
         borderRadius: BorderRadius.circular(30),
         border: Border.all(color: AppColors.black, width: 1),
       ),
       child: Row(
         children: [
           GestureDetector(
-            onTap: () {
-              if (widget.onCirclePressed != null) {
-                widget.onCirclePressed!();
-              } else {
-                setState(() {
-                  isInternallyCompleted = !isInternallyCompleted;
-                });
-              }
-            },
+            onTap: onCirclePressed, 
             child: Container(
               width: 32,
               height: 32,
               decoration: BoxDecoration(
-                color: isDisplayedCompleted ? completedColor : AppColors.white,
+                color: isExternallyCompleted ? completedColor : AppColors.white,
                 shape: BoxShape.circle,
               ),
-              child: isDisplayedCompleted
+              child: isExternallyCompleted
                   ? const Icon(Icons.check, color: AppColors.white, size: 20)
                   : null,
             ),
@@ -68,9 +49,9 @@ class _ActivityCardState extends State<ActivityCard> {
 
           Expanded(
             child: Text(
-              widget.title,
+              title,
               style: AppTextStyles.bodyBold.copyWith(
-                decoration: isDisplayedCompleted
+                decoration: isExternallyCompleted
                     ? TextDecoration.lineThrough
                     : TextDecoration.none,
                 decorationColor: completedColor,
@@ -79,29 +60,16 @@ class _ActivityCardState extends State<ActivityCard> {
             ),
           ),
 
-          GestureDetector(
-            onTap: () async {
-              final updatedTask =
-                  await showModalBottomSheet<Map<String, dynamic>>(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (context) => ClipRRect(
-                  borderRadius: const BorderRadius.vertical(
-                    top: Radius.circular(24),
-                  ),
-                  child: CreateTaskPage(
-                    isEditing: true,
-                    initialTitle: widget.title,
-                  ),
-                ),
-              );
-              if (updatedTask != null && widget.onEdited != null) {
-                widget.onEdited!(updatedTask);
-              }
-            },
-            child: const Icon(Icons.edit, color: AppColors.white, size: 20),
-          ),
+
+          if (onEdited != null)
+            GestureDetector(
+              onTap: onEdited,
+              child: const Icon(
+                Icons.edit,
+                color: AppColors.black,
+                size: 20,
+              ), 
+            ),
         ],
       ),
     );

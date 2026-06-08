@@ -5,6 +5,9 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
+// O seu novo service!
+import '../services/task_service.dart';
+
 import '../widgets/task_form_label.dart';
 import '../widgets/task_dropdown_button.dart';
 import '../widgets/day_selector_button.dart';
@@ -13,8 +16,14 @@ import '../widgets/success_dialog.dart';
 class CreateTaskPage extends StatefulWidget {
   final bool isEditing;
   final String? initialTitle;
+  final String? taskId;
 
-  const CreateTaskPage({super.key, this.isEditing = false, this.initialTitle});
+  const CreateTaskPage({
+    super.key,
+    this.isEditing = false,
+    this.initialTitle,
+    this.taskId,
+  });
 
   @override
   State<CreateTaskPage> createState() => _CreateTaskPageState();
@@ -29,6 +38,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
 
   late TextEditingController _titleController;
 
+  // Usando o seu serviço isolado
+  final TaskService _taskService = TaskService();
+  bool _isSaving = false;
+
   bool isEssential = true;
   bool hasTimer = false;
   int timerDurationMinutes = _defaultTimerDurationMinutes;
@@ -36,7 +49,6 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   bool hasNotifications = true;
 
   DateTime? selectedDate;
-
   List<bool> selectedDays = [false, false, true, false, true, false, false];
   final List<String> daysOfWeek = ['D', 'S', 'T', 'Q', 'Q', 'S', 'S'];
 
@@ -45,8 +57,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
         ? _pomodoroMinTimerDurationMinutes
         : _minTimerDurationMinutes;
     setState(() {
-      timerDurationMinutes = (timerDurationMinutes + deltaMinutes)
-          .clamp(effectiveMinMinutes, _maxTimerDurationMinutes);
+      timerDurationMinutes = (timerDurationMinutes + deltaMinutes).clamp(
+        effectiveMinMinutes,
+        _maxTimerDurationMinutes,
+      );
     });
   }
 
@@ -67,6 +81,61 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   void dispose() {
     _titleController.dispose();
     super.dispose();
+  }
+
+  // --- Salva na SUA coleção (tasks) ---
+  Future<void> _salvar() async {
+    final titulo = _titleController.text.trim();
+    if (titulo.isEmpty) return;
+
+    FocusScope.of(context).unfocus();
+    setState(() => _isSaving = true);
+
+    try {
+      final dadosDaTarefa = {
+        'title': titulo,
+        'isEssential': isEssential,
+        'hasTimer': hasTimer,
+        'timerDurationMinutes': hasTimer ? timerDurationMinutes : null,
+        'isPomodoro': hasTimer ? isPomodoro : false,
+        'colorKey': isEssential ? 'blue' : 'pink',
+      };
+
+      if (widget.isEditing && widget.taskId != null) {
+        await _taskService.updateTask(widget.taskId!, dadosDaTarefa);
+      } else {
+        await _taskService.createTask(dadosDaTarefa);
+      }
+
+      if (!mounted) return;
+
+      await showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const SuccessDialog(),
+      );
+
+      if (mounted) Navigator.of(context).pop();
+    } catch (e) {
+      if (mounted) {
+        // Alerta na tela caso dê algum BO
+        showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: const Text('Ops! Erro ao salvar'),
+            content: Text('Ocorreu um erro ao enviar para o Firebase:\n\n$e'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isSaving = false);
+    }
   }
 
   @override
@@ -178,9 +247,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                               lastDate: DateTime(2030),
                             );
                             if (picked != null) {
-                              setState(() {
-                                selectedDate = picked;
-                              });
+                              setState(() => selectedDate = picked);
                             }
                           },
                         ),
@@ -314,29 +381,7 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        final nomeDaNovaTarefa = _titleController.text;
-
-                        if (nomeDaNovaTarefa.trim().isEmpty) return;
-
-                        FocusScope.of(context).unfocus();
-
-                        showDialog(
-                          context: context,
-                          barrierDismissible: false,
-                          builder: (context) => const SuccessDialog(),
-                        ).then((_) {
-                          if (context.mounted) {
-                            Navigator.of(context).pop(<String, dynamic>{
-                              'title': nomeDaNovaTarefa,
-                              'hasTimer': hasTimer,
-                              if (hasTimer)
-                                'timerDurationMinutes': timerDurationMinutes,
-                              if (hasTimer) 'isPomodoro': isPomodoro,
-                            });
-                          }
-                        });
-                      },
+                      onPressed: _isSaving ? null : _salvar,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.blueVariant,
                         padding: const EdgeInsets.symmetric(vertical: 16),
@@ -345,12 +390,23 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                         ),
                         elevation: 0,
                       ),
-                      child: Text(
-                        widget.isEditing
-                            ? 'Salvar Edição'
-                            : AppStrings.btnAddTask,
-                        style: AppTextStyles.bodyBold.copyWith(fontSize: 16),
-                      ),
+                      child: _isSaving
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                          : Text(
+                              widget.isEditing
+                                  ? 'Salvar Edição'
+                                  : AppStrings.btnAddTask,
+                              style: AppTextStyles.bodyBold.copyWith(
+                                fontSize: 16,
+                              ),
+                            ),
                     ),
                   ),
                   const SizedBox(height: 24),
