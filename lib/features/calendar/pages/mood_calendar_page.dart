@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/constants/app_strings.dart';
+import '../services/mood_service.dart';
+// Importando o MoodIcon para reaproveitar os botões bonitos da Home!
+import '../../home/widgets/mood_icon.dart'; 
 
 class MoodCalendarPage extends StatelessWidget {
   const MoodCalendarPage({super.key});
@@ -26,8 +29,7 @@ class MoodCalendarPage extends StatelessWidget {
                   ),
                   Expanded(
                     child: Column(
-                      mainAxisSize:
-                          MainAxisSize.min, 
+                      mainAxisSize: MainAxisSize.min,
                       children: [
                         const _HighlightedTitle(
                           leading: AppStrings.moodTitleLeading,
@@ -48,16 +50,27 @@ class MoodCalendarPage extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 24),
-
               const _WeekdayRow(),
               const SizedBox(height: 10),
 
-              const _MoodCalendarGrid(),
-              const SizedBox(height: 18),
+              // INTEGRAÇÃO REAL COM FIREBASE AQUI
+              StreamBuilder<List<MoodModel>>(
+                stream: MoodService().ouvirHumores(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const SizedBox(
+                      height: 250,
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
+                  final moods = snapshot.data ?? [];
+                  return _MoodCalendarGrid(moods: moods);
+                },
+              ),
 
+              const SizedBox(height: 18),
               const _MonthMoodCard(),
               const SizedBox(height: 24),
-
               const _StatsRow(),
             ],
           ),
@@ -128,52 +141,110 @@ class _WeekdayRow extends StatelessWidget {
 }
 
 class _MoodCalendarGrid extends StatelessWidget {
-  const _MoodCalendarGrid();
+  final List<MoodModel> moods;
 
-  static const List<_MoodType?> _moods = [
-    null,
-    null,
-    _MoodType.calm,
-    _MoodType.calm,
-    _MoodType.anxious,
-    _MoodType.anxious,
-    _MoodType.calm,
-    _MoodType.happy,
-    _MoodType.angry,
-    null,
-    _MoodType.anxious,
-    _MoodType.alert,
-    _MoodType.angry,
-    _MoodType.calm,
-    _MoodType.happy,
-    _MoodType.happy,
-    null,
-    null,
-    _MoodType.anxious,
-    _MoodType.anxious,
-    _MoodType.happy,
-    _MoodType.angry,
-    _MoodType.happy,
-    _MoodType.happy,
-    _MoodType.calm,
-    _MoodType.calm,
-    _MoodType.happy,
-    _MoodType.anxious,
-    _MoodType.anxious,
-    _MoodType.calm,
-    _MoodType.happy,
-    _MoodType.angry,
-    null,
-    null,
-    null,
-  ];
+  const _MoodCalendarGrid({required this.moods});
+
+  // ABERTURA DO BOTTOM SHEET QUANDO CLICAR NUM DIA VAZIO
+  void _mostrarBottomSheetDeHumor(BuildContext context, DateTime dataSelecionada) {
+    final moodService = MoodService();
+    
+    // Mostra o modal de baixo para cima
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(24),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Como você estava no dia ${dataSelecionada.day}?',
+              style: AppTextStyles.heading2,
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                MoodIcon(
+                  color: AppColors.moodAnimada,
+                  label: 'Animada',
+                  imagePath: 'assets/images/icon-animada.png',
+                  onTap: () {
+                    moodService.registrarHumor('happy', dataDesejada: dataSelecionada);
+                    Navigator.pop(context);
+                  },
+                ),
+                MoodIcon(
+                  color: AppColors.moodSensivel,
+                  label: 'Sensível',
+                  imagePath: 'assets/images/icon-sensivel.png',
+                  onTap: () {
+                    moodService.registrarHumor('calm', dataDesejada: dataSelecionada);
+                    Navigator.pop(context);
+                  },
+                ),
+                MoodIcon(
+                  color: AppColors.moodBrava,
+                  label: 'Brava',
+                  imagePath: 'assets/images/icon-brava.png',
+                  onTap: () {
+                    moodService.registrarHumor('angry', dataDesejada: dataSelecionada);
+                    Navigator.pop(context);
+                  },
+                ),
+                MoodIcon(
+                  color: AppColors.moodInsegura,
+                  label: 'Insegura',
+                  imagePath: 'assets/images/icon-insegura.png',
+                  onTap: () {
+                    moodService.registrarHumor('anxious', dataDesejada: dataSelecionada);
+                    Navigator.pop(context);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final daysInMonth = DateUtils.getDaysInMonth(now.year, now.month);
+    final firstDayOfMonth = DateTime(now.year, now.month, 1);
+
+    int offset = firstDayOfMonth.weekday;
+    if (offset == 7) offset = 0;
+
+    final List<_MoodType?> grid = List.generate(42, (index) {
+      if (index < offset || index >= offset + daysInMonth) return null;
+      final day = index - offset + 1;
+
+      try {
+        final moodForDay = moods.firstWhere(
+          (m) =>
+              m.date.year == now.year &&
+              m.date.month == now.month &&
+              m.date.day == day,
+        );
+        return _stringToMoodType(moodForDay.type);
+      } catch (_) {
+        return null; // Retorna null se não houver humor preenchido
+      }
+    });
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: _moods.length,
+      itemCount: 42,
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 7,
         crossAxisSpacing: 8,
@@ -181,52 +252,87 @@ class _MoodCalendarGrid extends StatelessWidget {
         childAspectRatio: 1,
       ),
       itemBuilder: (context, index) {
-        final mood = _moods[index];
-        return _MoodDayCell(mood: mood);
+        final mood = grid[index];
+        final bool isValidDay = (index >= offset && index < offset + daysInMonth);
+        final int dayNumber = index - offset + 1;
+        
+        // Criamos a data exata daquele quadradinho (se for um dia válido)
+        final DateTime? dataDoQuadradinho = isValidDay 
+            ? DateTime(now.year, now.month, dayNumber) 
+            : null;
+
+        return GestureDetector(
+          // Se for um dia válido (mesmo passado ou futuro) e estiver sem humor ou a pessoa quiser trocar
+          onTap: () {
+            if (isValidDay && dataDoQuadradinho != null) {
+              // Só não deixa preencher dias que ainda não chegaram (se quiser bloquear o futuro)
+              if (dataDoQuadradinho.isAfter(now)) {
+                 ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Você não pode prever o futuro! 🔮')),
+                );
+              } else {
+                 _mostrarBottomSheetDeHumor(context, dataDoQuadradinho);
+              }
+            }
+          },
+          child: _MoodDayCell(
+            mood: mood, 
+            isValidDay: isValidDay, 
+            dayNumber: dayNumber, // Passamos o número para desenhar na tela se estiver vazio
+          ),
+        );
       },
     );
+  }
+
+  _MoodType _stringToMoodType(String type) {
+    switch (type) {
+      case 'happy': return _MoodType.happy;
+      case 'calm': return _MoodType.calm;
+      case 'angry': return _MoodType.angry;
+      case 'anxious': return _MoodType.anxious;
+      case 'alert': return _MoodType.alert;
+      default: return _MoodType.happy;
+    }
   }
 }
 
 class _MoodDayCell extends StatelessWidget {
   final _MoodType? mood;
+  final bool isValidDay;
+  final int dayNumber;
 
-  const _MoodDayCell({required this.mood});
+  const _MoodDayCell({required this.mood, required this.isValidDay, required this.dayNumber});
 
-  // Função para retornar o caminho correto da imagem baseada no humor
   String _getIconPath(_MoodType type) {
     switch (type) {
-      case _MoodType.happy:
-        return 'assets/images/icon-animada.png';
-      case _MoodType.calm:
-        return 'assets/images/icon-sensivel.png';
-      case _MoodType.angry:
-        return 'assets/images/icon-brava.png';
-      case _MoodType.anxious:
-        return 'assets/images/icon-insegura.png';
-      case _MoodType.alert:
-        return 'assets/images/icon-alerta.png'; 
+      case _MoodType.happy: return 'assets/images/icon-animada.png';
+      case _MoodType.calm: return 'assets/images/icon-sensivel.png';
+      case _MoodType.angry: return 'assets/images/icon-brava.png';
+      case _MoodType.anxious: return 'assets/images/icon-insegura.png';
+      case _MoodType.alert: return 'assets/images/icon-alerta.png';
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final Color fillColor = _MoodPalette.colorFor(mood);
+    final Color fillColor = mood != null
+        ? _MoodPalette.colorFor(mood)
+        : (isValidDay ? const Color(0xFFF1F1F1) : Colors.transparent);
 
     return Container(
       decoration: BoxDecoration(
         color: fillColor,
         borderRadius: BorderRadius.circular(8),
       ),
+      // Se não tiver humor, mas for um dia válido, mostra o número do dia cinza claro
       child: mood == null
-          ? null
+          ? (isValidDay 
+              ? Center(child: Text('$dayNumber', style: const TextStyle(color: Colors.black26, fontWeight: FontWeight.bold))) 
+              : null)
           : Padding(
               padding: const EdgeInsets.all(6.0),
-              child: Image.asset(
-                _getIconPath(mood!),
-                fit: BoxFit
-                    .contain, 
-              ),
+              child: Image.asset(_getIconPath(mood!), fit: BoxFit.contain),
             ),
     );
   }
@@ -237,25 +343,18 @@ enum _MoodType { happy, calm, angry, anxious, alert }
 class _MoodPalette {
   static Color colorFor(_MoodType? mood) {
     switch (mood) {
-      case _MoodType.happy:
-        return AppColors.moodAnimada;
-      case _MoodType.calm:
-        return AppColors.moodSensivel;
-      case _MoodType.angry:
-        return AppColors.moodBrava;
-      case _MoodType.anxious:
-        return AppColors.moodInsegura;
-      case _MoodType.alert:
-        return AppColors.alertRed;
-      default:
-        return const Color(0xFFF1F1F1);
+      case _MoodType.happy: return AppColors.moodAnimada;
+      case _MoodType.calm: return AppColors.moodSensivel;
+      case _MoodType.angry: return AppColors.moodBrava;
+      case _MoodType.anxious: return AppColors.moodInsegura;
+      case _MoodType.alert: return AppColors.alertRed;
+      default: return const Color(0xFFF1F1F1);
     }
   }
 }
 
 class _MonthMoodCard extends StatelessWidget {
   const _MonthMoodCard();
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -300,10 +399,7 @@ class _MonthMoodCard extends StatelessWidget {
           SizedBox(
             width: 80,
             height: 80,
-            child: Image.asset(
-              'assets/images/icon-animada.png',
-              fit: BoxFit.contain,
-            ),
+            child: Image.asset('assets/images/icon-animada.png', fit: BoxFit.contain),
           ),
         ],
       ),
@@ -313,7 +409,6 @@ class _MonthMoodCard extends StatelessWidget {
 
 class _StatsRow extends StatelessWidget {
   const _StatsRow();
-
   @override
   Widget build(BuildContext context) {
     return const Row(
@@ -342,7 +437,6 @@ class _StatItem extends StatelessWidget {
   final String title;
   final String value;
   final String subtitle;
-
   const _StatItem({
     required this.title,
     required this.value,

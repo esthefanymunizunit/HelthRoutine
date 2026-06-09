@@ -9,8 +9,10 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_background.dart';
 
+// Importando os três serviços
 import 'package:healthroutine/features/feature-template/services/rotina_service.dart';
 import '../../tasks/services/task_service.dart';
+import '../../calendar/services/mood_service.dart';
 
 import '../../calendar/pages/mood_calendar_page.dart';
 import '../../timer/pages/timer_page.dart';
@@ -29,6 +31,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   final RotinaService _rotinaService = RotinaService();
   final TaskService _taskService = TaskService();
+  final MoodService _moodService = MoodService();
 
   bool isLowEnergyMode = false;
   Map<String, dynamic>? mockData;
@@ -89,41 +92,68 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
-
+  // --- CRUD DAS TAREFAS ---
   Future<void> _onCircleRotina(Atividade a) async {
-    if (a.hasTimer) {
-      final completou = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (_) => TimerPage(
-            taskTitle: a.title,
-            workDurationMinutes: a.timerDurationMinutes,
-            isPomodoro: a.isPomodoro,
+    try {
+      if (a.hasTimer) {
+        final completou = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (_) => TimerPage(
+              taskTitle: a.title,
+              workDurationMinutes: a.timerDurationMinutes,
+              isPomodoro: a.isPomodoro,
+            ),
           ),
-        ),
-      );
-      if (completou == true) await _rotinaService.definirConcluida(a.id, true);
-    } else {
-      await _rotinaService.definirConcluida(a.id, !a.concluida); 
+        );
+        if (completou == true)
+          await _rotinaService.definirConcluida(a.id, true);
+      } else {
+        await _rotinaService.definirConcluida(a.id, !a.concluida);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Erro: $e',
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _onCircleTask(TaskModel task) async {
-    if (task.hasTimer) {
-      final completou = await Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (_) => TimerPage(
-            taskTitle: task.title,
-            workDurationMinutes: task.timerDurationMinutes,
-            isPomodoro: task.isPomodoro,
+    try {
+      if (task.hasTimer) {
+        final completou = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(
+            builder: (_) => TimerPage(
+              taskTitle: task.title,
+              workDurationMinutes: task.timerDurationMinutes,
+              isPomodoro: task.isPomodoro,
+            ),
           ),
-        ),
-      );
-      if (completou == true) await _taskService.toggleConcluida(task.id, true);
-    } else {
-      await _taskService.toggleConcluida(
-        task.id,
-        !task.concluida,
-      ); 
+        );
+        if (completou == true)
+          await _taskService.toggleConcluida(task.id, true);
+      } else {
+        await _taskService.toggleConcluida(task.id, !task.concluida);
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Erro: $e',
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -185,6 +215,33 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // --- CALENDÁRIO E MODO BAIXA ENERGIA ---
+  Future<void> _salvarHumorEAbrirCalendario(String humorType) async {
+    try {
+      // CORREÇÃO AQUI: Agora a Home chama a nova função registrarHumor
+      await _moodService.registrarHumor(humorType);
+      if (mounted) _openMoodCalendarPage();
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'Erro ao salvar humor: $e',
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  void _openMoodCalendarPage() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => const MoodCalendarPage()));
+  }
+
   Future<void> _handleLowEnergyCircle(Map<String, dynamic> activity) async {
     final String title = activity['title'] as String;
     if (_activitiesCompletedViaTimer.contains(title)) {
@@ -201,14 +258,9 @@ class _HomePageState extends State<HomePage> {
       ),
     );
     if (!mounted) return;
-    if (completed == true)
+    if (completed == true) {
       setState(() => _activitiesCompletedViaTimer.add(title));
-  }
-
-  void _openMoodCalendarPage() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const MoodCalendarPage()));
+    }
   }
 
   void _toggleLowEnergyMode() async {
@@ -225,12 +277,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading)
+    if (isLoading) {
       return const Scaffold(
         body: Center(
           child: CircularProgressIndicator(color: AppColors.blueVariant),
         ),
       );
+    }
 
     final List<dynamic> currentSuggestions = mockData!['suggestions'];
 
@@ -302,11 +355,11 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
+                
                 isLowEnergyMode
                     ? _buildLowEnergyActivities()
                     : _buildFirestoreActivities(),
-
+                
                 const SizedBox(height: 32),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -359,6 +412,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // --- LISTA ÚNICA E SEGURA ---
   Widget _buildFirestoreActivities() {
     return Container(
       padding: const EdgeInsets.all(16),
@@ -381,22 +435,27 @@ class _HomePageState extends State<HomePage> {
                 );
               }
 
-              final rotinas = rotinaSnap.data ?? [];
-              final tasks = taskSnap.data ?? [];
+              // FILTRA APENAS AS NÃO CONCLUÍDAS PARA AS DUAS LISTAS
+              final rotinas = (rotinaSnap.data ?? [])
+                  .where((a) => !a.concluida)
+                  .toList();
+              final tasks = (taskSnap.data ?? [])
+                  .where((t) => !t.concluida)
+                  .toList();
+
               final todasAsAtividades = [...rotinas, ...tasks];
 
               if (todasAsAtividades.isEmpty) {
                 return Padding(
                   padding: const EdgeInsets.all(16),
                   child: Text(
-                    'Sem atividades ainda. Crie um template ou uma nova tarefa abaixo.',
+                    'Tudo feito por hoje! Aproveite seu descanso ou adicione uma nova tarefa abaixo.',
                     style: AppTextStyles.bodySmall.copyWith(
                       color: Colors.black54,
                     ),
                   ),
                 );
               }
-
 
               return ListView.separated(
                 shrinkWrap: true,
@@ -414,10 +473,9 @@ class _HomePageState extends State<HomePage> {
                         key: ValueKey('rotina_${item.id}'),
                         color: _hexToColor(item.cor),
                         title: item.title,
-                        isExternallyCompleted:
-                            item.concluida, 
+                        isExternallyCompleted: item.concluida,
                         onCirclePressed: () => _onCircleRotina(item),
-                        onEdited: null, 
+                        onEdited: null,
                       ),
                     );
                   } else if (item is TaskModel) {
@@ -427,12 +485,11 @@ class _HomePageState extends State<HomePage> {
                         key: ValueKey('task_${item.id}'),
                         color: _getColor(item.colorKey),
                         title: item.title,
-                        isExternallyCompleted:
-                            item.concluida, 
+                        isExternallyCompleted: item.concluida,
                         onCirclePressed: () => _onCircleTask(item),
                         onEdited: () => _abrirCriarEditarTarefa(
                           task: item,
-                        ), 
+                        ),
                       ),
                     );
                   }
@@ -496,28 +553,32 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(height: 4),
             Text(AppStrings.checkInSubtitle, style: AppTextStyles.bodySmall),
             const SizedBox(height: 20),
-            const Row(
+            Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 MoodIcon(
                   color: AppColors.moodAnimada,
                   label: 'Animada',
                   imagePath: 'assets/images/icon-animada.png',
+                  onTap: () => _salvarHumorEAbrirCalendario('happy'),
                 ),
                 MoodIcon(
                   color: AppColors.moodSensivel,
                   label: 'Sensível',
                   imagePath: 'assets/images/icon-sensivel.png',
+                  onTap: () => _salvarHumorEAbrirCalendario('calm'),
                 ),
                 MoodIcon(
                   color: AppColors.moodBrava,
                   label: 'Brava',
                   imagePath: 'assets/images/icon-brava.png',
+                  onTap: () => _salvarHumorEAbrirCalendario('angry'),
                 ),
                 MoodIcon(
                   color: AppColors.moodInsegura,
                   label: 'Insegura',
                   imagePath: 'assets/images/icon-insegura.png',
+                  onTap: () => _salvarHumorEAbrirCalendario('anxious'),
                 ),
               ],
             ),
