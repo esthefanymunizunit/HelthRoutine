@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'dart:convert';
-import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_background.dart';
-import '../widgets/progress_circle_section.dart';
-import '../widgets/weekly_bar_chart.dart';
 import '../services/reports_service.dart';
+import '../widgets/weekly_bar_chart.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({super.key});
@@ -18,34 +16,34 @@ class ReportsPage extends StatefulWidget {
 
 class _ReportsPageState extends State<ReportsPage> {
   final _reportsService = ReportsService();
-  Map<String, dynamic>? mockData;
-  bool isLoading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _carregarRelatorio();
-  }
-
-  Future<void> _carregarRelatorio() async {
-    try {
-      final result = await _reportsService.gerarRelatorioSemanal();
-      setState(() {
-        mockData = result;
-        isLoading = false;
-      });
-    } catch (e) {
-      debugPrint("Erro ao gerar relatório: $e");
-      setState(() => isLoading = false);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading || mockData == null) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: _reportsService.ouvirTasks(),
+      builder: (context, taskSnap) {
+        return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+          stream: _reportsService.ouvirRotinas(),
+          builder: (context, rotinaSnap) {
+            if (!taskSnap.hasData || !rotinaSnap.hasData) {
+              return const Scaffold(
+                body: Center(child: CircularProgressIndicator()),
+              );
+            }
 
+            final data = _reportsService.montarRelatorio(
+              taskSnap.data!.docs,
+              rotinaSnap.data!.docs,
+            );
+
+            return _buildConteudo(data);
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildConteudo(Map<String, dynamic> data) {
     return Scaffold(
       body: AppBackground(
         child: SafeArea(
@@ -54,19 +52,15 @@ class _ReportsPageState extends State<ReportsPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Header
                 Text(AppStrings.reportsTitle, style: AppTextStyles.heading1),
                 const SizedBox(height: 4),
                 Text(
                   AppStrings.reportsSubtitle,
-                  style: AppTextStyles.bodySmall.copyWith(
-                    color: Colors.black87,
-                  ),
+                  style:
+                      AppTextStyles.bodySmall.copyWith(color: Colors.black87),
                 ),
                 const SizedBox(height: 40),
 
-                const ProgressCircleSection(),
-                const SizedBox(height: 40),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -76,7 +70,7 @@ class _ReportsPageState extends State<ReportsPage> {
                     ),
                     Builder(
                       builder: (context) {
-                        final change = mockData!['weeklyChange'];
+                        final change = data['weeklyChange'];
                         final texto = change == null
                             ? 'primeira semana'
                             : '${change >= 0 ? '+' : ''}$change% vs semana passada';
@@ -117,25 +111,24 @@ class _ReportsPageState extends State<ReportsPage> {
                 ),
                 const SizedBox(height: 24),
 
-                WeeklyBarChart(data: mockData!['weeklyChart']),
+                WeeklyBarChart(data: data['weeklyChart']),
                 const SizedBox(height: 32),
 
                 Row(
                   children: [
                     _buildSmallStatCard(
                       title: AppStrings.sundayReset,
-                      value: mockData!['stats']['sundayReset'] ?? "3/4",
+                      value: data['stats']['sundayReset'] ?? "3/4",
                       color: AppColors.softYellow,
                       isCircular: false,
                     ),
                     const SizedBox(width: 16),
                     _buildSmallStatCard(
                       title: AppStrings.physicalActivity,
-                      value: mockData!['stats']['activity'] ?? "—",
+                      value: data['stats']['activity'] ?? "—",
                       color: AppColors.cloudBlue,
                       isCircular: true,
-                      ratio: (mockData!['stats']['activityRatio'] ?? 0.0)
-                          .toDouble(),
+                      ratio: (data['stats']['activityRatio'] ?? 0.0).toDouble(),
                     ),
                   ],
                 ),
@@ -157,13 +150,12 @@ class _ReportsPageState extends State<ReportsPage> {
                           children: [
                             Text(
                               AppStrings.insightTitle,
-                              style: AppTextStyles.heading2.copyWith(
-                                fontSize: 14,
-                              ),
+                              style: AppTextStyles.heading2
+                                  .copyWith(fontSize: 14),
                             ),
                             const SizedBox(height: 8),
                             Text(
-                              mockData!['insight'],
+                              data['insight'],
                               style: AppTextStyles.bodySmall.copyWith(
                                 color: AppColors.black,
                                 fontWeight: FontWeight.bold,
@@ -172,7 +164,6 @@ class _ReportsPageState extends State<ReportsPage> {
                           ],
                         ),
                       ),
-                      // Sua imagem roxa exportada do Figma
                       Image.asset(
                         'assets/images/icon-roxo-feliz.png',
                         width: 60,
@@ -220,10 +211,8 @@ class _ReportsPageState extends State<ReportsPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  value,
-                  style: AppTextStyles.heading1.copyWith(fontSize: 24),
-                ),
+                Text(value,
+                    style: AppTextStyles.heading1.copyWith(fontSize: 24)),
                 if (isCircular)
                   SizedBox(
                     width: 32,
