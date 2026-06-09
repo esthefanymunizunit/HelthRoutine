@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:healthroutine/core/services/auth_service.dart';
 import 'package:healthroutine/features/login/pages/login_screen.dart';
 import 'package:healthroutine/features/profile/widgets/profile_avatar.dart';
 import 'package:healthroutine/features/profile/widgets/profile_card.dart';
@@ -14,10 +16,99 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage>{
+
+  final AuthService _authService = AuthService();
+
+  final User? _currentUser = FirebaseAuth.instance.currentUser;
+
   bool _notificationBtn = true;
+  String _localName = "";
 
   @override
+  void initState() {
+    super.initState();
+    final String userEmail = _currentUser?.email ?? "";
+    _localName = _currentUser?.displayName ?? 
+        (userEmail.contains('@') ? userEmail.split('@')[0] : "Usuário");
+  }
+
+  void _showEditNameDialog() {
+    final TextEditingController nameController = TextEditingController(text: _localName);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Editar Nome de Usuário"),
+          content: TextField(
+            controller: nameController,
+            style: const TextStyle(color: AppColors.black),
+            decoration: const InputDecoration(
+              hintText: "Digite seu nome",
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: AppColors.cloudBlue),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancelar", style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.cloudBlue),
+              onPressed: () async {
+                final novoNome = nameController.text.trim();
+                if (novoNome.isNotEmpty && _currentUser != null) {
+                  try {
+                    // 1. Atualiza o nome direto no core do Firebase Auth
+                    await _currentUser.updateDisplayName(novoNome);
+                    // 2. Força o recarregamento do usuário para persistir os dados locais
+                    await _currentUser.reload(); 
+                    
+                    setState(() {
+                      _localName = novoNome; // 3. Atualiza a UI do Flutter
+                    });
+                    
+                    if (mounted) Navigator.pop(context);
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Erro ao atualizar o nome.")),
+                      );
+                    }
+                  }
+                }
+              },
+              child: const Text("Salvar", style: TextStyle(color: Colors.black)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _handleLogout() async {
+    try{
+      await _authService.signOut();
+    } catch (_) {
+      await FirebaseAuth.instance.signOut();
+    }
+
+    if (mounted){
+      Navigator.pushAndRemoveUntil(
+        context, 
+        MaterialPageRoute(builder: (context) => LoginScreen()), 
+        (route) => false,
+        );
+    }
+  }
+  
+  @override
   Widget build(BuildContext context) {
+    
+    final String userEmail = _currentUser?.email ?? "email@souunit.com.br";
+    
     return Container(
         width: double.infinity,
         decoration: const BoxDecoration(
@@ -39,13 +130,13 @@ class _ProfilePageState extends State<ProfilePage>{
               const SizedBox(height: 30),
 
               // --- SEÇÃO: DADOS PESSOAIS ---
-              const ProfileSectionCard(
+              ProfileSectionCard(
                 title: "Dados Pessoais",
                 showEditButton: true,
+                onEditPressed: _showEditNameDialog,
                 children: [
-                  ProfileInfoRow(label: "Nome", value: "Mariana Silva"),
-                  ProfileInfoRow(label: "E-mail", value: "mariana.silva@gmail.com"),
-                  ProfileInfoRow(label: "Data de nascimento", value: "12/05/1994"),
+                  ProfileInfoRow(label: "Nome", value: _localName),
+                  ProfileInfoRow(label: "E-mail", value: userEmail),
                 ],
               ),
 
@@ -95,11 +186,7 @@ class _ProfilePageState extends State<ProfilePage>{
                 width: 238,
                 height: 35,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(context, 
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
-                    );
-                  },
+                  onPressed: _handleLogout,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.borderBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
