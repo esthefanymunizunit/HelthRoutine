@@ -46,9 +46,6 @@ class _HomePageState extends State<HomePage> {
     _rotinaService.seedPadraoSeVazio().catchError(
       (e) => debugPrint('Erro ao semear: $e'),
     );
-    _rotinaService.limparExpiradas().catchError(
-      (e) => debugPrint('Erro ao limpar: $e'),
-    );
   }
 
   String get _saudacao {
@@ -355,11 +352,11 @@ class _HomePageState extends State<HomePage> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                
+
                 isLowEnergyMode
                     ? _buildLowEnergyActivities()
                     : _buildFirestoreActivities(),
-                
+
                 const SizedBox(height: 32),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,

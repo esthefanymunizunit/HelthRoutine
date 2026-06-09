@@ -7,6 +7,7 @@ import '../../../core/theme/app_text_styles.dart';
 import '../../../core/widgets/app_background.dart';
 import '../widgets/progress_circle_section.dart';
 import '../widgets/weekly_bar_chart.dart';
+import '../services/reports_service.dart';
 
 class ReportsPage extends StatefulWidget {
   const ReportsPage({super.key});
@@ -16,26 +17,25 @@ class ReportsPage extends StatefulWidget {
 }
 
 class _ReportsPageState extends State<ReportsPage> {
+  final _reportsService = ReportsService();
   Map<String, dynamic>? mockData;
   bool isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadMockData();
+    _carregarRelatorio();
   }
 
-  Future<void> _loadMockData() async {
+  Future<void> _carregarRelatorio() async {
     try {
-      final String response = await rootBundle.loadString(
-        'assets/mocks/reports_mock.json',
-      );
+      final result = await _reportsService.gerarRelatorioSemanal();
       setState(() {
-        mockData = json.decode(response);
+        mockData = result;
         isLoading = false;
       });
     } catch (e) {
-      debugPrint("Erro ao carregar o mock: $e");
+      debugPrint("Erro ao gerar relatório: $e");
       setState(() => isLoading = false);
     }
   }
@@ -74,33 +74,44 @@ class _ReportsPageState extends State<ReportsPage> {
                       AppStrings.weeklySummary,
                       style: AppTextStyles.heading2.copyWith(fontSize: 14),
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Colors.grey.shade200,
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.arrow_upward,
-                            size: 14,
-                            color: AppColors.cloudBlue,
+                    Builder(
+                      builder: (context) {
+                        final change = mockData!['weeklyChange'];
+                        final texto = change == null
+                            ? 'primeira semana'
+                            : '${change >= 0 ? '+' : ''}$change% vs semana passada';
+                        final subiu = change == null || change >= 0;
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            AppStrings.weeklyComparison,
-                            style: const TextStyle(
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black54,
-                            ),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                        ],
-                      ),
+                          child: Row(
+                            children: [
+                              Icon(
+                                subiu
+                                    ? Icons.arrow_upward
+                                    : Icons.arrow_downward,
+                                size: 14,
+                                color: AppColors.cloudBlue,
+                              ),
+                              const SizedBox(width: 4),
+                              Text(
+                                texto,
+                                style: const TextStyle(
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black54,
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
                   ],
                 ),
@@ -120,9 +131,11 @@ class _ReportsPageState extends State<ReportsPage> {
                     const SizedBox(width: 16),
                     _buildSmallStatCard(
                       title: AppStrings.physicalActivity,
-                      value: mockData!['stats']['activity'] ?? "85%",
+                      value: mockData!['stats']['activity'] ?? "—",
                       color: AppColors.cloudBlue,
                       isCircular: true,
+                      ratio: (mockData!['stats']['activityRatio'] ?? 0.0)
+                          .toDouble(),
                     ),
                   ],
                 ),
@@ -183,6 +196,7 @@ class _ReportsPageState extends State<ReportsPage> {
     required String value,
     required Color color,
     required bool isCircular,
+    double ratio = 0.0,
   }) {
     return Expanded(
       child: Container(
@@ -215,7 +229,7 @@ class _ReportsPageState extends State<ReportsPage> {
                     width: 32,
                     height: 32,
                     child: CircularProgressIndicator(
-                      value: 0.85,
+                      value: ratio,
                       color: color,
                       backgroundColor: Colors.grey.shade200,
                       strokeWidth: 8,

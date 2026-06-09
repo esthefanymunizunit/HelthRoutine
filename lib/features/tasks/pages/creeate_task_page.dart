@@ -5,7 +5,6 @@ import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_text_styles.dart';
 
-// O seu novo service!
 import '../services/task_service.dart';
 
 import '../widgets/task_form_label.dart';
@@ -47,6 +46,16 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
   int timerDurationMinutes = _defaultTimerDurationMinutes;
   bool isPomodoro = false;
   bool hasNotifications = true;
+  
+  static const List<String> _categorias = [
+    'Atividade Física',
+    'Estudos',
+    'Sono',
+    'Alimentação',
+    'Meditação',
+    'Outro',
+  ];
+  String _categoriaSelecionada = 'Outro';
 
   DateTime? selectedDate;
   List<bool> selectedDays = [false, false, true, false, true, false, false];
@@ -104,7 +113,10 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
       if (widget.isEditing && widget.taskId != null) {
         await _taskService.updateTask(widget.taskId!, dadosDaTarefa);
       } else {
-        await _taskService.createTask(dadosDaTarefa);
+        await _taskService.createTask({
+          ...dadosDaTarefa,
+          'categoria': _categoriaSelecionada,
+        });
       }
 
       if (!mounted) return;
@@ -216,6 +228,39 @@ class _CreateTaskPageState extends State<CreateTaskPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
+
+                  if (!widget.isEditing) ...[
+                    const TaskFormLabel(text: 'Categoria'),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      decoration: BoxDecoration(
+                        color: AppColors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: Colors.grey.shade300),
+                      ),
+                      child: DropdownButton<String>(
+                        value: _categoriaSelecionada,
+                        isExpanded: true,
+                        underline: const SizedBox(),
+                        dropdownColor: AppColors.white,
+                        style: const TextStyle(
+                          color: AppColors.black,
+                          fontSize: 16,
+                        ),
+                        items: _categorias
+                            .map((c) =>
+                                DropdownMenuItem(value: c, child: Text(c)))
+                            .toList(),
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() => _categoriaSelecionada = value);
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                  ],
 
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
