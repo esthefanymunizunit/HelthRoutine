@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:healthroutine/features/tasks/pages/creeate_task_page.dart';
-import 'package:healthroutine/features/feature-template/services/rotina_service.dart';
 import '../constants/app_strings.dart';
 import '../theme/app_colors.dart';
 import 'bottom_nav_icon.dart';
@@ -67,8 +66,8 @@ class CustomBottomNav extends StatelessWidget {
 
   static FloatingActionButton buildFAB(BuildContext context) {
     return FloatingActionButton(
-      onPressed: () async {
-        final novaTarefa = await showModalBottomSheet<Map<String, dynamic>>(
+      onPressed: () {
+        showModalBottomSheet(
           context: context,
           isScrollControlled: true,
           backgroundColor: Colors.transparent,
@@ -77,20 +76,6 @@ class CustomBottomNav extends StatelessWidget {
             child: CreateTaskPage(),
           ),
         );
-
-        final titulo = novaTarefa?['title'] as String?;
-        if (novaTarefa != null && titulo != null && titulo.isNotEmpty) {
-          // CREATE: grava a nova tarefa direto no Firestore (com criado_por).
-          final bool temTimer = novaTarefa['hasTimer'] == true;
-          await RotinaService().adicionarUma(
-            title: titulo,
-            hasTimer: temTimer,
-            timerDurationMinutes: temTimer
-                ? novaTarefa['timerDurationMinutes'] as int?
-                : null,
-            isPomodoro: temTimer && novaTarefa['isPomodoro'] == true,
-          );
-        }
       },
       backgroundColor: AppColors.black,
       shape: const CircleBorder(),

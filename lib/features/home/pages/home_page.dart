@@ -86,13 +86,14 @@ class _HomePageState extends State<HomePage> {
       });
     } catch (e) {
       debugPrint("Erro ao carregar o mock: $e");
+      if (mounted) setState(() => isLoading = false);
     }
   }
 
   // --- CRUD DAS TAREFAS ---
   Future<void> _onCircleRotina(Atividade a) async {
     try {
-      if (a.hasTimer) {
+      if (a.hasTimer && !a.concluida) {
         final completou = await Navigator.of(context).push<bool>(
           MaterialPageRoute(
             builder: (_) => TimerPage(
@@ -124,7 +125,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _onCircleTask(TaskModel task) async {
     try {
-      if (task.hasTimer) {
+      if (task.hasTimer && !task.concluida) {
         final completou = await Navigator.of(context).push<bool>(
           MaterialPageRoute(
             builder: (_) => TimerPage(
@@ -399,13 +400,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      floatingActionButton: isLowEnergyMode
-          ? null
-          : FloatingActionButton(
-              onPressed: () => _abrirCriarEditarTarefa(),
-              backgroundColor: AppColors.blueVariant,
-              child: const Icon(Icons.add, color: Colors.white),
-            ),
     );
   }
 

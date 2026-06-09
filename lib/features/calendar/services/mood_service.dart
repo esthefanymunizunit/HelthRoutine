@@ -37,6 +37,7 @@ class MoodService {
     // O comando .set() cria o documento se não existir, ou substitui se já existir!
     await _col.doc(docId).set({
       'uid': _user.uid,
+      'criado_por': _user.email,
       'type': tipo,
       // Se estamos salvando um dia passado, guardamos o dia exato ao meio-dia
       'date': Timestamp.fromDate(DateTime(data.year, data.month, data.day, 12, 0, 0)),
