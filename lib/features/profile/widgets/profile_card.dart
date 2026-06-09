@@ -5,12 +5,14 @@ class ProfileSectionCard extends StatelessWidget {
   final String title;
   final List<Widget> children;
   final bool showEditButton;
+  final VoidCallback? onEditPressed;
 
   const ProfileSectionCard({
     super.key,
     required this.title,
     required this.children,
     this.showEditButton = false,
+    this.onEditPressed,
   });
 
   @override
@@ -47,7 +49,7 @@ class ProfileSectionCard extends StatelessWidget {
           Positioned(
             bottom: -20,
             child: FloatingActionButton.small(
-              onPressed: () {},
+              onPressed: onEditPressed,
               backgroundColor: AppColors.cloudBlue,
               shape: CircleBorder(),
               child: const Icon(Icons.edit, color: Colors.black),

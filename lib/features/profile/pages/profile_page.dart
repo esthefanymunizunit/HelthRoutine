@@ -22,6 +22,71 @@ class _ProfilePageState extends State<ProfilePage>{
   final User? _currentUser = FirebaseAuth.instance.currentUser;
 
   bool _notificationBtn = true;
+  String _localName = "";
+
+  @override
+  void initState() {
+    super.initState();
+    final String userEmail = _currentUser?.email ?? "";
+    _localName = _currentUser?.displayName ?? 
+        (userEmail.contains('@') ? userEmail.split('@')[0] : "Usuário");
+  }
+
+  void _showEditNameDialog() {
+    final TextEditingController nameController = TextEditingController(text: _localName);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Editar Nome de Usuário"),
+          content: TextField(
+            controller: nameController,
+            style: const TextStyle(color: AppColors.black),
+            decoration: const InputDecoration(
+              hintText: "Digite seu nome",
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: AppColors.cloudBlue),
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancelar", style: TextStyle(color: Colors.grey)),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.cloudBlue),
+              onPressed: () async {
+                final novoNome = nameController.text.trim();
+                if (novoNome.isNotEmpty && _currentUser != null) {
+                  try {
+                    // 1. Atualiza o nome direto no core do Firebase Auth
+                    await _currentUser.updateDisplayName(novoNome);
+                    // 2. Força o recarregamento do usuário para persistir os dados locais
+                    await _currentUser.reload(); 
+                    
+                    setState(() {
+                      _localName = novoNome; // 3. Atualiza a UI do Flutter
+                    });
+                    
+                    if (mounted) Navigator.pop(context);
+                  } catch (e) {
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text("Erro ao atualizar o nome.")),
+                      );
+                    }
+                  }
+                }
+              },
+              child: const Text("Salvar", style: TextStyle(color: Colors.black)),
+            ),
+          ],
+        );
+      },
+    );
+  }
 
   Future<void> _handleLogout() async {
     try{
@@ -44,9 +109,6 @@ class _ProfilePageState extends State<ProfilePage>{
     
     final String userEmail = _currentUser?.email ?? "email@souunit.com.br";
     
-    final String userName = _currentUser?.displayName ?? 
-      (userEmail.contains('@') ? userEmail.split('@')[0]: "Usuário");
-
     return Container(
         width: double.infinity,
         decoration: const BoxDecoration(
@@ -71,8 +133,9 @@ class _ProfilePageState extends State<ProfilePage>{
               ProfileSectionCard(
                 title: "Dados Pessoais",
                 showEditButton: true,
+                onEditPressed: _showEditNameDialog,
                 children: [
-                  ProfileInfoRow(label: "Nome", value: userName),
+                  ProfileInfoRow(label: "Nome", value: _localName),
                   ProfileInfoRow(label: "E-mail", value: userEmail),
                 ],
               ),
