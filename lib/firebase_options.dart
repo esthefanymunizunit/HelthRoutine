@@ -21,15 +21,9 @@ class DefaultFirebaseOptions {
     }
     switch (defaultTargetPlatform) {
       case TargetPlatform.android:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for android - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return android;
       case TargetPlatform.iOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for ios - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return ios;
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -58,6 +52,24 @@ class DefaultFirebaseOptions {
     messagingSenderId: '916869031451',
     projectId: 'healthroutine-unit-2026',
     authDomain: 'healthroutine-unit-2026.firebaseapp.com',
+    storageBucket: 'healthroutine-unit-2026.firebasestorage.app',
+  );
+
+  static const FirebaseOptions ios = FirebaseOptions(
+    apiKey: 'AIzaSyDQtNZ5hL7UTpGo_vex28n3dibaKeha4pQ',
+    appId: '1:916869031451:ios:f4bca8cbc447b17e53fabe',
+    messagingSenderId: '916869031451',
+    projectId: 'healthroutine-unit-2026',
+    storageBucket: 'healthroutine-unit-2026.firebasestorage.app',
+    iosClientId: '916869031451-n2skd9kmdf9irnfcqaj8om7g38l7flqt.apps.googleusercontent.com',
+    iosBundleId: 'com.example.healthroutine',
+  );
+
+  static const FirebaseOptions android = FirebaseOptions(
+    apiKey: 'AIzaSyDzfSqLXz1rbrV9MKwn33R9YyaIAXI2I-o',
+    appId: '1:916869031451:android:465b06199eb8a95353fabe',
+    messagingSenderId: '916869031451',
+    projectId: 'healthroutine-unit-2026',
     storageBucket: 'healthroutine-unit-2026.firebasestorage.app',
   );
 }

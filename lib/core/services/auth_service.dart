@@ -1,4 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
+import 'package:google_sign_in/google_sign_in.dart';
 
 import '../constants/app_strings.dart';
 
@@ -11,6 +13,10 @@ class AuthDomainException implements Exception {
 }
 
 class AuthService {
+  static const String _googleWebClientId =
+      '916869031451-qf0c2aphc8642kus89sqea4d641jn0hq.apps.googleusercontent.com';
+  static bool _isMobileGoogleSignInInitialized = false;
+
   final FirebaseAuth _firebaseAuth;
 
   AuthService({FirebaseAuth? firebaseAuth})
@@ -48,15 +54,36 @@ class AuthService {
   }
 
   Future<User> signInWithGoogle() async {
-    final googleProvider = GoogleAuthProvider()
-      ..setCustomParameters({'prompt': 'select_account'});
-    final credential = await _firebaseAuth.signInWithPopup(googleProvider);
+    final UserCredential credential;
+    if (kIsWeb) {
+      final googleProvider = GoogleAuthProvider()
+        ..setCustomParameters({'prompt': 'select_account'});
+      credential = await _firebaseAuth.signInWithPopup(googleProvider);
+    } else {
+      await _ensureMobileGoogleSignInInitialized();
+      final account = await GoogleSignIn.instance.authenticate();
+      final auth = account.authentication;
+      final googleFirebaseCredential = GoogleAuthProvider.credential(
+        idToken: auth.idToken,
+      );
+      credential = await _firebaseAuth.signInWithCredential(
+        googleFirebaseCredential,
+      );
+    }
     final user = credential.user!;
     await _validateDomainOrSignOut(user);
     return user;
   }
 
   Future<void> signOut() => _firebaseAuth.signOut();
+
+  Future<void> _ensureMobileGoogleSignInInitialized() async {
+    if (_isMobileGoogleSignInInitialized) return;
+    await GoogleSignIn.instance.initialize(
+      serverClientId: _googleWebClientId,
+    );
+    _isMobileGoogleSignInInitialized = true;
+  }
 
   void _ensureDomainAllowed(String email) {
     if (!email.toLowerCase().endsWith(AppStrings.authAllowedDomainSuffix)) {

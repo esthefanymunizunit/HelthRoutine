@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "916869031451",
+    "project_id": "healthroutine-unit-2026",
+    "storage_bucket": "healthroutine-unit-2026.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:916869031451:android:465b06199eb8a95353fabe",
+        "android_client_info": {
+          "package_name": "com.example.healthroutine"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "916869031451-ti83hb9n1qf5opmspem3v7l0tv9kkebs.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.healthroutine",
+            "certificate_hash": "4965f5c0322761419e39710be0b05b9c8108368c"
+          }
+        },
+        {
+          "client_id": "916869031451-qf0c2aphc8642kus89sqea4d641jn0hq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDzfSqLXz1rbrV9MKwn33R9YyaIAXI2I-o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "916869031451-qf0c2aphc8642kus89sqea4d641jn0hq.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "916869031451-n2skd9kmdf9irnfcqaj8om7g38l7flqt.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.healthroutine"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
