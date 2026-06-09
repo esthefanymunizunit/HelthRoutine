@@ -81,26 +81,6 @@ class RotinaService {
     });
   }
 
-  // ---------------- LIMPEZA das concluidas vencidas ----------------
-  /// Apaga do banco as concluidas ha mais de 24h. Chame ao abrir a Home.
-  Future<void> limparExpiradas() async {
-    final agora = DateTime.now();
-    final snap = await _col.where('uid', isEqualTo: _user.uid).get();
-    final batch = FirebaseFirestore.instance.batch();
-    var temAlgo = false;
-    for (final d in snap.docs) {
-      final data = d.data();
-      if (data['concluida'] == true && data['concluida_em'] is Timestamp) {
-        final marcada = (data['concluida_em'] as Timestamp).toDate();
-        if (agora.difference(marcada).inHours >= 24) {
-          batch.delete(d.reference);
-          temAlgo = true;
-        }
-      }
-    }
-    if (temAlgo) await batch.commit();
-  }
-
   // ---------------- SEED (uma vez) ----------------
   Future<void> seedPadraoSeVazio() async {
     final existentes = await _col

@@ -12,6 +12,7 @@ class TaskModel {
   final Timestamp? concluidaEm; 
   final String criadoPor;
   final String colorKey;
+  final String categoria;
 
   TaskModel({
     required this.id,
@@ -24,6 +25,7 @@ class TaskModel {
     this.concluidaEm, 
     required this.criadoPor,
     required this.colorKey,
+    this.categoria = 'Outro',
   });
 
   factory TaskModel.fromDoc(DocumentSnapshot<Map<String, dynamic>> doc) {
@@ -39,6 +41,7 @@ class TaskModel {
       concluidaEm: d['concluida_em'] as Timestamp?,
       criadoPor: d['criado_por'] ?? '',
       colorKey: d['colorKey'] ?? 'blue',
+      categoria: d['categoria'] ?? 'Outro',
     );
   }
 }
@@ -53,11 +56,12 @@ class TaskService {
   }
 
  
-  Future<void> createTask(Map<String, dynamic> dados) async {
+   Future<void> createTask(Map<String, dynamic> dados) async {
     await _col.add({
+      'categoria': 'Outro',
       ...dados,
       'concluida': false,
-      'concluida_em': null, 
+      'concluida_em': null,
       'origem': 'Tarefa Avulsa',
       'criado_por': _user.email,
       'uid': _user.uid,
