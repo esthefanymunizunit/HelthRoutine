@@ -88,6 +88,40 @@ class _ProfilePageState extends State<ProfilePage>{
     );
   }
 
+  void _confirmarEncerramentoSessao() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            "Sair da Conta", 
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const Text("Tem certeza que deseja sair do HealthRoutine?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text(
+                "Não", 
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _handleLogout();
+              },
+              child: const Text(
+                "Sim", 
+                style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _handleLogout() async {
     try{
       await _authService.signOut();
@@ -186,12 +220,12 @@ class _ProfilePageState extends State<ProfilePage>{
                 width: 238,
                 height: 35,
                 child: ElevatedButton(
-                  onPressed: _handleLogout,
+                  onPressed: _confirmarEncerramentoSessao,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.borderBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
                   ),
-                  child: const Text("Sair", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+                  child: const Text("Sair da Conta", style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
                 ),
               ),
               
