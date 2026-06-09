@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:healthroutine/core/services/auth_service.dart';
 import 'package:healthroutine/features/login/pages/login_screen.dart';
 import 'package:healthroutine/features/profile/widgets/profile_avatar.dart';
 import 'package:healthroutine/features/profile/widgets/profile_card.dart';
@@ -14,10 +16,37 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage>{
+
+  final AuthService _authService = AuthService();
+
+  final User? _currentUser = FirebaseAuth.instance.currentUser;
+
   bool _notificationBtn = true;
 
+  Future<void> _handleLogout() async {
+    try{
+      await _authService.signOut();
+    } catch (_) {
+      await FirebaseAuth.instance.signOut();
+    }
+
+    if (mounted){
+      Navigator.pushAndRemoveUntil(
+        context, 
+        MaterialPageRoute(builder: (context) => LoginScreen()), 
+        (route) => false,
+        );
+    }
+  }
+  
   @override
   Widget build(BuildContext context) {
+    
+    final String userEmail = _currentUser?.email ?? "email@souunit.com.br";
+    
+    final String userName = _currentUser?.displayName ?? 
+      (userEmail.contains('@') ? userEmail.split('@')[0]: "Usuário");
+
     return Container(
         width: double.infinity,
         decoration: const BoxDecoration(
@@ -39,13 +68,12 @@ class _ProfilePageState extends State<ProfilePage>{
               const SizedBox(height: 30),
 
               // --- SEÇÃO: DADOS PESSOAIS ---
-              const ProfileSectionCard(
+              ProfileSectionCard(
                 title: "Dados Pessoais",
                 showEditButton: true,
                 children: [
-                  ProfileInfoRow(label: "Nome", value: "Mariana Silva"),
-                  ProfileInfoRow(label: "E-mail", value: "mariana.silva@gmail.com"),
-                  ProfileInfoRow(label: "Data de nascimento", value: "12/05/1994"),
+                  ProfileInfoRow(label: "Nome", value: userName),
+                  ProfileInfoRow(label: "E-mail", value: userEmail),
                 ],
               ),
 
@@ -95,11 +123,7 @@ class _ProfilePageState extends State<ProfilePage>{
                 width: 238,
                 height: 35,
                 child: ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(context, 
-                    MaterialPageRoute(builder: (context) => const LoginScreen()),
-                    );
-                  },
+                  onPressed: _handleLogout,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppColors.borderBlue,
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(25)),
